@@ -11,7 +11,7 @@ use tokio::sync::Mutex;
 use tracing::{debug, instrument};
 
 use super::extension::{ExtensionConfig, ExtensionError, ExtensionInfo, ExtensionResult};
-use crate::prompt_template::{load_prompt, load_prompt_file};
+use crate::prompt_template;
 use crate::providers::base::{Provider, ProviderUsage};
 use mcp_client::client::{ClientCapabilities, ClientInfo, McpClient, McpClientTrait};
 use mcp_client::transport::{SseTransport, StdioTransport, Transport};
@@ -30,7 +30,7 @@ pub struct Capabilities {
     clients: HashMap<String, McpClientBox>,
     instructions: HashMap<String, String>,
     resource_capable_extensions: HashSet<String>,
-    provider: Box<dyn Provider>,
+    provider: Arc<Box<dyn Provider>>,
     provider_usage: Mutex<Vec<ProviderUsage>>,
     system_prompt_override: Option<String>,
     system_prompt_extensions: Vec<String>,
@@ -90,7 +90,7 @@ impl Capabilities {
             clients: HashMap::new(),
             instructions: HashMap::new(),
             resource_capable_extensions: HashSet::new(),
-            provider,
+            provider: Arc::new(provider),
             provider_usage: Mutex::new(Vec::new()),
             system_prompt_override: None,
             system_prompt_extensions: Vec::new(),
@@ -202,8 +202,8 @@ impl Capabilities {
     }
 
     /// Get a reference to the provider
-    pub fn provider(&self) -> &dyn Provider {
-        &*self.provider
+    pub fn provider(&self) -> Arc<Box<dyn Provider>> {
+        Arc::clone(&self.provider)
     }
 
     /// Record provider usage
@@ -340,12 +340,13 @@ impl Capabilities {
         context.insert("extensions", serde_json::to_value(extensions_info).unwrap());
         context.insert("current_date_time", Value::String(current_date_time));
 
-        // Conditionally load the override prompt or the default system prompt
-        // and set the base prompt to the context
+        // Conditionally load the override prompt or the global system prompt
         let base_prompt = if let Some(override_prompt) = &self.system_prompt_override {
-            load_prompt(override_prompt, &context).expect("Prompt should render")
+            prompt_template::render_inline_once(override_prompt, &context)
+                .expect("Prompt should render")
         } else {
-            load_prompt_file("system.md", &context).expect("Prompt should render")
+            prompt_template::render_global_file("system.md", &context)
+                .expect("Prompt should render")
         };
 
         if self.system_prompt_extensions.is_empty() {
@@ -619,7 +620,7 @@ impl Capabilities {
 
         // Log any errors that occurred
         if !errors.is_empty() {
-            tracing::error!(
+            tracing::debug!(
                 errors = ?errors
                     .into_iter()
                     .map(|e| format!("{:?}", e))
