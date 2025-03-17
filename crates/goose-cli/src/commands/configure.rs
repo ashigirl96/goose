@@ -1,6 +1,7 @@
 use cliclack::spinner;
 use console::style;
 use goose::agents::{extension::Envs, ExtensionConfig};
+use goose::config::extensions::name_to_key;
 use goose::config::{Config, ConfigError, ExperimentManager, ExtensionEntry, ExtensionManager};
 use goose::message::Message;
 use goose::providers::{create, providers};
@@ -296,8 +297,16 @@ pub async fn configure_provider_dialog() -> Result<bool, Box<dyn Error>> {
     let spin = spinner();
     spin.start("Checking your configuration...");
 
-    // Use max tokens to speed up the provider test.
-    let model_config = goose::model::ModelConfig::new(model.clone()).with_max_tokens(Some(50));
+    // Create model config with env var settings
+    let model_config = goose::model::ModelConfig::new(model.clone())
+        .with_max_tokens(Some(50))
+        .with_toolshim(
+            std::env::var("GOOSE_TOOLSHIM")
+                .map(|val| val == "1" || val.to_lowercase() == "true")
+                .unwrap_or(false),
+        )
+        .with_toolshim_model(std::env::var("GOOSE_TOOLSHIM_OLLAMA_MODEL").ok());
+
     let provider = create(provider_name, model_config)?;
 
     let messages =
@@ -379,7 +388,10 @@ pub fn toggle_extensions_dialog() -> Result<(), Box<dyn Error>> {
 
     // Update enabled status for each extension
     for name in extension_status.iter().map(|(name, _)| name) {
-        ExtensionManager::set_enabled(name, selected.iter().any(|s| s.as_str() == name))?;
+        ExtensionManager::set_enabled(
+            &name_to_key(name),
+            selected.iter().any(|s| s.as_str() == name),
+        )?;
     }
 
     cliclack::outro("Extension settings updated successfully")?;
@@ -415,22 +427,22 @@ pub fn configure_extensions_dialog() -> Result<(), Box<dyn Error>> {
                     "Code editing and shell access",
                 )
                 .item(
-                    "computercontroller",
+                    "Computer Controller",
                     "Computer Controller",
                     "controls for webscraping, file caching, and automations",
                 )
                 .item(
-                    "google_drive",
+                    "Google Drive",
                     "Google Drive",
                     "Search and read content from google drive - additional config required",
                 )
                 .item(
-                    "memory",
+                    "Memory",
                     "Memory",
                     "Tools to save and retrieve durable memories",
                 )
                 .item(
-                    "tutorial",
+                    "Tutorial",
                     "Tutorial",
                     "Access interactive tutorials and guides",
                 )
@@ -442,7 +454,7 @@ pub fn configure_extensions_dialog() -> Result<(), Box<dyn Error>> {
                 .placeholder(&goose::config::DEFAULT_EXTENSION_TIMEOUT.to_string())
                 .validate(|input: &String| match input.parse::<u64>() {
                     Ok(_) => Ok(()),
-                    Err(_) => Err("Please enter a valide timeout"),
+                    Err(_) => Err("Please enter a valid timeout"),
                 })
                 .interact()?;
 
@@ -630,10 +642,17 @@ pub fn remove_extension_dialog() -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
 
+    // Filter out only disabled extensions
+    let disabled_extensions: Vec<_> = extensions
+        .iter()
+        .filter(|entry| !entry.enabled)
+        .map(|entry| (entry.config.name().to_string(), entry.enabled))
+        .collect();
+
     let selected = cliclack::multiselect("Select extensions to remove (note: you can only remove disabled extensions - use \"space\" to toggle and \"enter\" to submit)")
         .required(false)
         .items(
-            &extension_status
+            &disabled_extensions
                 .iter()
                 .filter(|(_, enabled)| !enabled)
                 .map(|(name, _)| (name, name.as_str(), ""))
@@ -642,7 +661,7 @@ pub fn remove_extension_dialog() -> Result<(), Box<dyn Error>> {
         .interact()?;
 
     for name in selected {
-        ExtensionManager::remove(name)?;
+        ExtensionManager::remove(&name_to_key(name))?;
         cliclack::outro(format!("Removed {} extension", style(name).green()))?;
     }
 
@@ -697,6 +716,11 @@ pub fn configure_goose_mode_dialog() -> Result<(), Box<dyn Error>> {
         .item(
             "approve",
             "Approve Mode",
+            "All tools, extensions and file modificatio will require human approval"
+        )
+        .item(
+            "smart_approve",
+            "Smart Approve Mode",
             "Editing, creating, deleting files and using extensions will require human approval"
         )
         .item(
@@ -713,7 +737,11 @@ pub fn configure_goose_mode_dialog() -> Result<(), Box<dyn Error>> {
         }
         "approve" => {
             config.set_param("GOOSE_MODE", Value::String("approve".to_string()))?;
-            cliclack::outro("Set to Approve Mode - modifications require approval")?;
+            cliclack::outro("Set to Approve Mode - all tools and modifications require approval")?;
+        }
+        "smart_approve" => {
+            config.set_param("GOOSE_MODE", Value::String("smart_approve".to_string()))?;
+            cliclack::outro("Set to Smart Approve Mode - modifications require approval")?;
         }
         "chat" => {
             config.set_param("GOOSE_MODE", Value::String("chat".to_string()))?;

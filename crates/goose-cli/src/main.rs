@@ -8,10 +8,11 @@ use goose_cli::commands::bench::{list_suites, run_benchmark};
 use goose_cli::commands::configure::handle_configure;
 use goose_cli::commands::info::handle_info;
 use goose_cli::commands::mcp::run_server;
+use goose_cli::commands::session::handle_session_list;
 use goose_cli::logging::setup_logging;
 use goose_cli::session;
 use goose_cli::session::build_session;
-use std::io::{self, Read};
+use std::io::Read;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -54,6 +55,23 @@ fn extract_identifier(identifier: Identifier) -> session::Identifier {
 }
 
 #[derive(Subcommand)]
+enum SessionCommand {
+    #[command(about = "List all available sessions")]
+    List {
+        #[arg(short, long, help = "List all available sessions")]
+        verbose: bool,
+
+        #[arg(
+            short,
+            long,
+            help = "Output format (text, json)",
+            default_value = "text"
+        )]
+        format: String,
+    },
+}
+
+#[derive(Subcommand)]
 enum Command {
     /// Configure Goose settings
     #[command(about = "Configure Goose settings")]
@@ -77,6 +95,8 @@ enum Command {
         visible_alias = "s"
     )]
     Session {
+        #[command(subcommand)]
+        command: Option<SessionCommand>,
         /// Identifier for the chat session
         #[command(flatten)]
         identifier: Option<Identifier>,
@@ -127,7 +147,7 @@ enum Command {
             short,
             long,
             value_name = "FILE",
-            help = "Path to instruction file containing commands",
+            help = "Path to instruction file containing commands. Use - for stdin.",
             conflicts_with = "input_text"
         )]
         instructions: Option<String>,
@@ -299,27 +319,36 @@ async fn main() -> Result<()> {
             let _ = run_server(&name).await;
         }
         Some(Command::Session {
+            command,
             identifier,
             resume,
             debug,
             extension,
             builtin,
         }) => {
-            let mut session = build_session(
-                identifier.map(extract_identifier),
-                resume,
-                extension,
-                builtin,
-                debug,
-            )
-            .await;
-
-            setup_logging(
-                session.session_file().file_stem().and_then(|s| s.to_str()),
-                None,
-            )?;
-            let _ = session.interactive(None).await;
-            return Ok(());
+            match command {
+                Some(SessionCommand::List { verbose, format }) => {
+                    handle_session_list(verbose, format)?;
+                    return Ok(());
+                }
+                None => {
+                    // Run session command by default
+                    let mut session = build_session(
+                        identifier.map(extract_identifier),
+                        resume,
+                        extension,
+                        builtin,
+                        debug,
+                    )
+                    .await;
+                    setup_logging(
+                        session.session_file().file_stem().and_then(|s| s.to_str()),
+                        None,
+                    )?;
+                    let _ = session.interactive(None).await;
+                    return Ok(());
+                }
+            }
         }
         Some(Command::Run {
             instructions,
@@ -331,24 +360,28 @@ async fn main() -> Result<()> {
             extension,
             builtin,
         }) => {
-            // Validate that we have some input source
-            if instructions.is_none() && input_text.is_none() {
-                eprintln!("Error: Must provide either --instructions or --text");
-                std::process::exit(1);
-            }
-
-            let contents = if let Some(file_name) = instructions {
-                let file_path = std::path::Path::new(&file_name);
-                std::fs::read_to_string(file_path).expect("Failed to read the instruction file")
-            } else if let Some(input_text) = input_text {
-                input_text
-            } else {
-                let mut stdin = String::new();
-                io::stdin()
-                    .read_to_string(&mut stdin)
-                    .expect("Failed to read from stdin");
-                stdin
+            let contents = match (instructions, input_text) {
+                (Some(file), _) if file == "-" => {
+                    let mut stdin = String::new();
+                    std::io::stdin()
+                        .read_to_string(&mut stdin)
+                        .expect("Failed to read from stdin");
+                    stdin
+                }
+                (Some(file), _) => std::fs::read_to_string(&file).unwrap_or_else(|err| {
+                    eprintln!(
+                        "Instruction file not found — did you mean to use goose run --text?\n{}",
+                        err
+                    );
+                    std::process::exit(1);
+                }),
+                (None, Some(text)) => text,
+                (None, None) => {
+                    eprintln!("Error: Must provide either --instructions (-i) or --text (-t). Use -i - for stdin.");
+                    std::process::exit(1);
+                }
             };
+
             let mut session = build_session(
                 identifier.map(extract_identifier),
                 resume,
@@ -357,6 +390,7 @@ async fn main() -> Result<()> {
                 debug,
             )
             .await;
+
             setup_logging(
                 session.session_file().file_stem().and_then(|s| s.to_str()),
                 None,
@@ -367,6 +401,7 @@ async fn main() -> Result<()> {
             } else {
                 session.headless(contents).await?;
             }
+
             return Ok(());
         }
         Some(Command::Agents(cmd)) => {
