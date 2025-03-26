@@ -1,0 +1,63 @@
+# goose daemon API backend server
+# goosed - Gooseデーモン
+
+## 概要
+- goosedはGooseのバックエンドサーバー部分として機能する
+- Rustで実装され、HTTP APIを提供
+- localhostの動的に割り当てられたポートでリッスン
+- デスクトップアプリ（Goose Desktop）からのリクエストを処理し結果を返す
+
+## 主要エンドポイント
+```
+/status                - サーバーステータス確認
+/agent/versions        - 利用可能なエージェントバージョン取得
+/agent/providers       - 利用可能なプロバイダー一覧
+/agent                 - エージェント作成
+/agent/prompt          - システムプロンプト拡張
+/reply                 - チャットメッセージ送信（ストリーミング）
+/ask                   - 質問送信（非ストリーミング）
+/confirm               - ツール確認
+/sessions              - セッション一覧
+/sessions/:session_id  - セッション履歴取得
+```
+
+## 認証
+- ほとんどのエンドポイントでは`X-Secret-Key`ヘッダーによる認証が必要
+- この秘密鍵はGooseデスクトップアプリケーションが内部的に管理
+
+## リクエスト例
+```bash
+# ステータスチェック
+curl http://localhost:58058/status
+
+# 利用可能なエージェントバージョンの取得
+curl http://localhost:58058/agent/versions
+
+# 利用可能なプロバイダーの一覧
+curl http://localhost:58058/agent/providers
+
+# セッション取得（認証が必要）
+curl -H "X-Secret-Key: <secret>" http://localhost:58058/sessions
+
+# 質問送信（認証が必要）
+curl -X POST "http://localhost:58058/ask" \
+  -H "Content-Type: application/json" \
+  -H "X-Secret-Key: <secret>" \
+  -d '{
+    "prompt": "こんにちは",
+    "session_working_dir": "/path/to/working/dir"
+  }'
+
+# チャットメッセージ送信（認証が必要、ストリーミングレスポンス）
+curl -X POST "http://localhost:58058/reply" \
+  -H "Content-Type: application/json" \
+  -H "X-Secret-Key: <secret>" \
+  -d '{
+    "messages": [{"role": "user", "content": [{"type": "text", "text": "こんにちは"}]}],
+    "session_working_dir": "/path/to/working/dir"
+  }'
+```
+
+## 通信フロー
+Gooseデスクトップアプリケーション → goosedサーバー → Gooseバックエンド処理 → レスポンス → デスクトップUI表示
+

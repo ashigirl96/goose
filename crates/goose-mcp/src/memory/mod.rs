@@ -288,7 +288,7 @@ impl MemoryRouter {
         } else {
             &self.local_memory_dir
         };
-        base_dir.join(format!("{}.txt", category))
+        base_dir.join(format!("{}.md", category))
     }
 
     pub fn retrieve_all(&self, is_global: bool) -> io::Result<HashMap<String, Vec<String>>> {
@@ -302,7 +302,7 @@ impl MemoryRouter {
             for entry in fs::read_dir(base_dir)? {
                 let entry = entry?;
                 if entry.file_type()?.is_file() {
-                    let category = entry.file_name().to_string_lossy().replace(".txt", "");
+                    let category = entry.file_name().to_string_lossy().replace(".md", "");
                     let category_memories = self.retrieve(&category, is_global)?;
                     memories.insert(
                         category,
