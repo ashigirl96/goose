@@ -124,6 +124,7 @@ impl MemoryRouter {
                 - Confirm the desired storage location:
                   - Local storage (.goose/memory) for project-specific details.
                   - Global storage (~/.config/goose/memory) for user-wide data.
+                  - IMPORTANT: Unless the user explicitly states "store globally" or similar, prefer local storage by default.
                 - Use the remember_memory tool to store the information.
                   - `remember_memory(category, data, tags, is_global)`
              Keywords that trigger memory tools:
