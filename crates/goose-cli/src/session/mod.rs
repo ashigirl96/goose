@@ -265,7 +265,8 @@ impl Session {
 
         // Create a new editor with our custom completer
         let config = rustyline::Config::builder()
-            .completion_type(rustyline::CompletionType::Circular)
+            .completion_type(rustyline::CompletionType::List) // Use List mode to show all completion options
+            // .completion_prompt_limit(1)  // Show completion options even with just 1 candidate
             .build();
         let mut editor =
             rustyline::Editor::<GooseCompleter, rustyline::history::DefaultHistory>::with_config(
