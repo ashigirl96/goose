@@ -27,7 +27,6 @@ import {
   getTextContent,
   createAssistantMessage,
 } from '../types/message';
-import { ToastSuccess } from './settings/models/toasts';
 
 export interface ChatType {
   id: string;
@@ -379,6 +378,7 @@ export default function ChatView({
       <div className="relative flex items-center h-[36px] w-full">
         <MoreMenuLayout setView={setView} setIsGoosehintsModalOpen={setIsGoosehintsModalOpen} />
       </div>
+
       <Card className="flex flex-col flex-1 rounded-none h-[calc(100vh-95px)] w-full bg-bgApp mt-0 border-none relative">
         {messages.length === 0 ? (
           <Splash
