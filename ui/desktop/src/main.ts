@@ -122,7 +122,17 @@ const generateSecretKey = () => {
   return key;
 };
 
+const getSharingUrl = () => {
+  // checks app env for sharing url
+  loadShellEnv(app.isPackaged); // will try to take it from the zshrc file
+  // if GOOSE_BASE_URL_SHARE is found, we will set process.env.GOOSE_BASE_URL_SHARE, otherwise we return what it is set
+  // to in the env at bundle time
+  return process.env.GOOSE_BASE_URL_SHARE;
+};
+
 let [provider, model] = getGooseProvider();
+
+let sharingUrl = getSharingUrl();
 
 let appConfig = {
   GOOSE_PROVIDER: provider,
@@ -170,6 +180,7 @@ const createChat = async (
           GOOSE_PORT: port,
           GOOSE_WORKING_DIR: working_dir,
           REQUEST_DIR: dir,
+          GOOSE_BASE_URL_SHARE: sharingUrl,
           botConfig: botConfig,
         }),
       ],
@@ -224,36 +235,22 @@ const createChat = async (
     });
   }
 
-  // DevTools shortcut management
-  const registerDevToolsShortcut = (window: BrowserWindow) => {
-    globalShortcut.register('Alt+Command+I', () => {
-      window.webContents.openDevTools();
-    });
-  };
-
-  const unregisterDevToolsShortcut = () => {
-    globalShortcut.unregister('Alt+Command+I');
-  };
-
-  // Register shortcuts when window is focused
-  mainWindow.on('focus', () => {
-    registerDevToolsShortcut(mainWindow);
-    // Register reload shortcut
-    globalShortcut.register('CommandOrControl+R', () => {
+  // Set up local keyboard shortcuts that only work when the window is focused
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'r' && input.meta) {
       mainWindow.reload();
-    });
-  });
+      event.preventDefault();
+    }
 
-  // Unregister shortcuts when window loses focus
-  mainWindow.on('blur', () => {
-    unregisterDevToolsShortcut();
-    globalShortcut.unregister('CommandOrControl+R');
+    if (input.key === 'i' && input.alt && input.meta) {
+      mainWindow.webContents.openDevTools();
+      event.preventDefault();
+    }
   });
 
   windowMap.set(windowId, mainWindow);
   mainWindow.on('closed', () => {
     windowMap.delete(windowId);
-    unregisterDevToolsShortcut();
     goosedProcess.kill();
   });
   return mainWindow;
