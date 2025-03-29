@@ -10,7 +10,7 @@ use std::{
     path::PathBuf,
     pin::Pin,
 };
-
+use tracing::debug;
 use mcp_core::{
     handler::{PromptError, ResourceError, ToolError},
     prompt::Prompt,
@@ -268,7 +268,7 @@ impl MemoryRouter {
             }
         }
 
-        println!("updated instructions\n\n {}", updated_instructions);
+        debug!("updated instructions\n\n {}", updated_instructions);
 
         memory_router.set_instructions(updated_instructions);
 
