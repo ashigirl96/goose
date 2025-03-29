@@ -1,6 +1,38 @@
+
 # Gooseプラン機能の関連ファイル構造
 
 このドキュメントでは、Gooseのプラン機能に関連する主要なファイルとその役割について説明します。プラン機能はGooseのコードベース内の様々な場所に実装が分散しており、この全体像を理解することで機能の仕組みをより深く把握できます。
+
+<!-- TOC -->
+* [プラン機能の動作概要](#プラン機能の動作概要)
+* [プラン機能の詳細フロー](#プラン機能の詳細フロー)
+  * [コマンドインターフェース](#コマンドインターフェース)
+* [コアファイル](#コアファイル)
+  * [1. セッション管理関連ファイル](#1-セッション管理関連ファイル)
+    * [`crates/goose-cli/src/session/mod.rs`](#cratesgoose-clisrcsessionmodrs)
+    * [`crates/goose-cli/src/session/input.rs`](#cratesgoose-clisrcsessioninputrs)
+    * [`crates/goose-cli/src/session/output.rs`](#cratesgoose-clisrcsessionoutputrs)
+  * [2. エージェント関連ファイル](#2-エージェント関連ファイル)
+    * [`crates/goose/src/agents/agent.rs`](#cratesgoosesrcagentsagentrs)
+    * [`crates/goose/src/agents/capabilities.rs`](#cratesgoosesrcagentscapabilitiesrs)
+    * [`crates/goose/src/agents/reference.rs`](#cratesgoosesrcagentsreferencers)
+  * [3. プロンプトテンプレート](#3-プロンプトテンプレート)
+    * [`crates/goose/src/prompts/plan.md`](#cratesgoosesrcpromptsplanmd)
+    * [`crates/goose/src/prompts/system.md`](#cratesgoosesrcpromptssystemmd)
+* [プラン機能の内部動作の詳細](#プラン機能の内部動作の詳細)
+  * [Plannerプロンプトの設計意図](#plannerプロンプトの設計意図)
+  * [会話履歴とプラン情報の実際の処理](#会話履歴とプラン情報の実際の処理)
+  * [この設計の利点](#この設計の利点)
+  * [日本語によるプラン機能の拡張](#日本語によるプラン機能の拡張)
+* [プラン機能の活用シナリオとベストプラクティス](#プラン機能の活用シナリオとベストプラクティス)
+  * [活用シナリオ](#活用シナリオ)
+  * [ベストプラクティス](#ベストプラクティス)
+* [内部実装の詳細](#内部実装の詳細)
+  * [プランナーモデルの取得](#プランナーモデルの取得)
+* [関連ファイルの相互作用](#関連ファイルの相互作用)
+* [環境変数による設定](#環境変数による設定)
+* [ファイル間の依存関係](#ファイル間の依存関係)
+<!-- TOC -->
 
 ## プラン機能の動作概要
 
