@@ -268,6 +268,8 @@ impl MemoryRouter {
             }
         }
 
+        println!("updated instructions\n\n {}", updated_instructions);
+
         memory_router.set_instructions(updated_instructions);
 
         memory_router
