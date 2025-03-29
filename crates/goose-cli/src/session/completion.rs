@@ -1,32 +1,22 @@
-use rustyline::completion::{Completer, FilenameCompleter, Pair};
+use rustyline::completion::{Completer, Pair};
 use rustyline::highlight::{CmdKind, Highlighter};
 use rustyline::hint::Hinter;
 use rustyline::validate::Validator;
 use rustyline::{Helper, Result};
 use std::borrow::Cow;
 use std::sync::Arc;
-use std::cell::RefCell;
 
 use super::CompletionCache;
 
-/// Completer for Goose CLI commands with enhanced file navigation
+/// Completer for Goose CLI commands
 pub struct GooseCompleter {
     completion_cache: Arc<std::sync::RwLock<CompletionCache>>,
-    filename_completer: FilenameCompleter,
-    // Track file completions for improved navigation
-    current_file_completions: RefCell<Vec<Pair>>,
-    current_file_index: RefCell<usize>,
 }
 
 impl GooseCompleter {
     /// Create a new GooseCompleter with a reference to the Session's completion cache
     pub fn new(completion_cache: Arc<std::sync::RwLock<CompletionCache>>) -> Self {
-        Self { 
-            completion_cache,
-            filename_completer: FilenameCompleter::new(),
-            current_file_completions: RefCell::new(Vec::new()),
-            current_file_index: RefCell::new(0),
-        }
+        Self { completion_cache }
     }
 
     /// Complete prompt names for the /prompt command
@@ -263,36 +253,6 @@ impl GooseCompleter {
         // No completions available
         Ok((line.len(), vec![]))
     }
-    
-    /// Complete filenames with cycling functionality
-    fn complete_filenames(&self, line: &str, pos: usize, ctx: &rustyline::Context<'_>) -> Result<(usize, Vec<Pair>)> {
-        // Check if this is a continued completion (pressing tab again after first completion)
-        let has_current_completions = !self.current_file_completions.borrow().is_empty();
-        
-        if has_current_completions {
-            // Get the current completions
-            let completions = self.current_file_completions.borrow();
-            let mut index = *self.current_file_index.borrow();
-            
-            // Cycle to next completion
-            index = (index + 1) % completions.len();
-            *self.current_file_index.borrow_mut() = index;
-            
-            // Return just the current completion
-            return Ok((pos - line.len(), vec![completions[index].clone()]));
-        } else {
-            // First completion - get all matching files
-            let (start_pos, candidates) = self.filename_completer.complete(line, pos, ctx)?;
-            
-            // Save the completions for cycling
-            if !candidates.is_empty() {
-                *self.current_file_completions.borrow_mut() = candidates.clone();
-                *self.current_file_index.borrow_mut() = 0;
-            }
-            
-            return Ok((start_pos, candidates));
-        }
-    }
 }
 
 impl Completer for GooseCompleter {
@@ -302,17 +262,11 @@ impl Completer for GooseCompleter {
         &self,
         line: &str,
         pos: usize,
-        ctx: &rustyline::Context<'_>,
+        _ctx: &rustyline::Context<'_>,
     ) -> Result<(usize, Vec<Self::Candidate>)> {
         // If the cursor is not at the end of the line, don't try to complete
         if pos < line.len() {
             return Ok((pos, vec![]));
-        }
-        
-        // Reset file completions if we're not completing a file path
-        if !line.contains('/') && !line.contains('~') && !line.contains('.') {
-            *self.current_file_completions.borrow_mut() = Vec::new();
-            *self.current_file_index.borrow_mut() = 0;
         }
 
         // If the line starts with '/', it might be a slash command
@@ -383,12 +337,6 @@ impl Completer for GooseCompleter {
             if line.starts_with("/mode") {
                 return self.complete_mode_flags(line);
             }
-        }
-
-        // Try file completion for typical file paths
-        if line.contains('/') || line.contains('~') || line.contains('.') {
-            // Check for potential file paths in the input
-            return self.complete_filenames(line, pos, ctx);
         }
 
         // Default: no completions
@@ -646,32 +594,5 @@ mod tests {
             .complete_argument_keys("/prompt nonexistent")
             .unwrap();
         assert_eq!(candidates.len(), 0);
-    }
-    
-    // Test path detection for FilenameCompleter
-    #[test]
-    fn test_filename_completer_detection() {
-        let ctx = rustyline::Context::new();
-        let cache = create_test_cache();
-        let completer = GooseCompleter::new(cache);
-        
-        // Test absolute path
-        let result = completer.complete("/usr/local/bin", 14, &ctx);
-        // We can't assert specifics because they depend on the file system
-        
-        // Test relative path
-        let result = completer.complete("./src", 5, &ctx);
-        // We can't assert specifics because they depend on the file system
-        
-        // Test path with tilde
-        let result = completer.complete("~/Documents", 11, &ctx);
-        // We can't assert specifics because they depend on the file system
-        
-        // Test command with path argument
-        let result = completer.complete("cat /etc/", 9, &ctx);
-        // We can't assert specifics because they depend on the file system
-        
-        // Just assert we don't crash
-        assert!(result.is_ok());
     }
 }
