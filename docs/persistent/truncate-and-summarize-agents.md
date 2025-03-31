@@ -417,3 +417,168 @@ GOOSEモードは、ツールリクエストの処理方法を制御します：
 これらのエージェントは、`Capabilities`クラスの`get_prefixed_tools`メソッドを活用して、多様な拡張機能からのツールを統合し、一貫した命名規則でLLMに提供しています。この設計により、モジュール性と拡張性が高い、柔軟なフレームワークが実現されています。
 
 適切なエージェントの選択は、アプリケーションの要件、会話の長さ、必要なコンテキスト保持レベルによって異なります。一般的に、短い会話や高速なレスポンスが必要な場合は`TruncateAgent`が適しており、長い会話や会話の連続性が重要な場合は`SummarizeAgent`が適しています。
+
+## 9. truncate.rsとsummarize.rsの処理フロー図
+
+### 9.1 TruncateAgentの処理フロー
+
+```mermaid
+%%{init: { 'theme': 'monokai' } }%%
+flowchart TD
+    A[ユーザー入力] --> B[reply関数呼び出し]
+    B --> C{ツールシム有効?}
+    C -->|Yes| D[システムプロンプト修正]
+    C -->|No| E[capabilities.provider.complete呼び出し]
+    D --> E
+    E --> F{応答成功?}
+    F -->|Yes| G[応答をストリームに送信]
+    F -->|ContextLengthExceeded| H{最大試行回数超過?}
+    F -->|その他のエラー| I[エラーメッセージ送信]
+    H -->|Yes| J[エラーメッセージ送信]
+    H -->|No| K[truncation_attempt増加]
+    K --> L[estimate_factor減衰計算]
+    L --> M[truncate_messages関数呼び出し]
+    M --> N{truncate成功?}
+    N -->|Yes| E
+    N -->|No| O[エラーメッセージ送信]
+    G --> P{ツールリクエストあり?}
+    P -->|No| Q[終了]
+    P -->|Yes| R{GOOSEモード?}
+    R -->|auto| S[ツールを自動実行]
+    R -->|approve/smart_approve| T[承認チェック]
+    R -->|chat| U[ツール説明のみ]
+    T --> V{ユーザー承認済み?}
+    V -->|Yes| S
+    V -->|No| W{smart_approve & 読み取り専用?}
+    W -->|Yes| S
+    W -->|No| X[ユーザー確認要求]
+    X --> Y{承認?}
+    Y -->|Yes| S
+    Y -->|No| Z[拒否レスポンス]
+    S --> AA[ツール結果をストリームに送信]
+    U --> AA
+    Z --> AA
+    AA --> AB[メッセージ履歴更新]
+    AB --> E
+```
+
+### 9.2 SummarizeAgentの処理フロー
+
+```mermaid
+%%{init: { 'theme': 'monokai' } }%%
+flowchart TD
+    A[ユーザー入力] --> B[reply関数呼び出し]
+    B --> C[capabilities.provider.complete呼び出し]
+    C --> D{応答成功?}
+    D -->|Yes| E[応答をストリームに送信]
+    D -->|ContextLengthExceeded| F{最大試行回数超過?}
+    D -->|その他のエラー| G[エラーメッセージ送信]
+    F -->|Yes| H[エラーメッセージ送信]
+    F -->|No| I[truncation_attempt増加]
+    I --> J[estimate_factor減衰計算]
+    J --> K[summarize_messages関数呼び出し]
+    K --> L[condense_messages関数呼び出し]
+    L --> M{要約成功?}
+    M -->|Yes| C
+    M -->|No| N[truncate_messages関数呼び出し]
+    N --> C
+    E --> O{ツールリクエストあり?}
+    O -->|No| P[終了]
+    O -->|Yes| Q{GOOSEモード?}
+    Q -->|auto| R[ツールを自動実行]
+    Q -->|approve| S[read_only_tools検出]
+    Q -->|chat| T[ツール説明のみ]
+    S --> U{read_only?}
+    U -->|Yes| R
+    U -->|No| V[ユーザー確認要求]
+    V --> W{承認?}
+    W -->|Yes| R
+    W -->|No| X[拒否レスポンス]
+    R --> Y[ツール結果をストリームに送信]
+    T --> Y
+    X --> Y
+    Y --> Z[メッセージ履歴更新]
+    Z --> C
+```
+
+### 9.3 memory_condense.rsの処理フロー
+
+```mermaid
+%%{init: { 'theme': 'monokai' } }%%
+flowchart TD
+    A[condense_messages] --> B[メッセージのトークン総数計算]
+    B --> C[memory_condense関数呼び出し]
+    C --> D[メッセージスタック準備]
+    D --> E{total_tokens <= context_limit?}
+    E -->|Yes| F[完了]
+    E -->|No| G{前回の差分 > 0?}
+    G -->|No| H[要約失敗]
+    G -->|Yes| I[バッチ抽出]
+    I --> J[要約リクエスト作成]
+    J --> K[LLM呼び出し]
+    K --> L[要約テキスト取得]
+    L --> M[新しい会話に変換]
+    M --> N[トークン差分計算]
+    N --> O[カウンタ更新]
+    O --> E
+    H --> P[エラー返却]
+```
+
+### 9.4 truncate.rsの処理フロー
+
+```mermaid
+%%{init: { 'theme': 'monokai' } }%%
+flowchart TD
+    A[truncate_messages] --> B{メッセージ配列とトークン配列の長さ一致?}
+    B -->|No| C[エラー]
+    B -->|Yes| D[総トークン数計算]
+    D --> E{total_tokens <= context_limit?}
+    E -->|Yes| F[切り捨て不要]
+    E -->|No| G[OldestFirstTruncation戦略実行]
+    G --> H[削除対象インデックス決定]
+    H --> I[メッセージとトークン削除]
+    I --> J{最後のメッセージがユーザーのテキストのみ?}
+    J -->|No| K[最後のメッセージ削除]
+    J -->|Yes| L{最初のメッセージがユーザーのテキストのみ?}
+    K --> J
+    L -->|No| M[最初のメッセージ削除]
+    L -->|Yes| N{メッセージ残っている?}
+    M --> L
+    N -->|No| O[エラー]
+    N -->|Yes| P{総トークン数 <= context_limit?}
+    P -->|No| Q[エラー]
+    P -->|Yes| R[完了]
+```
+
+### 9.5 TruncateAgentとSummarizeAgentの主な違い
+
+```mermaid
+%%{init: { 'theme': 'monokai' } }%%
+graph LR
+    subgraph "TruncateAgent"
+        TA1[メッセージを古い順に切り捨て]
+        TA2[情報の損失が大きい]
+        TA3[単純かつ高速]
+        TA4[ツールシム機能あり]
+        TA5[smart_approveモード対応]
+    end
+
+    subgraph "SummarizeAgent"
+        SA1[AIを使用した会話要約]
+        SA2[重要情報を保持]
+        SA3[要約失敗時はtruncateにフォールバック]
+        SA4[ツールシム機能なし]
+        SA5[smart_approveモード非対応]
+    end
+
+    Context[コンテキスト対応方法] --> TA1
+    Context --> SA1
+    Information[情報保持] --> TA2
+    Information --> SA2
+    Performance[性能特性] --> TA3
+    Performance --> SA3
+    Features[機能差異] --> TA4
+    Features --> SA4
+    Features --> TA5
+    Features --> SA5
+```
