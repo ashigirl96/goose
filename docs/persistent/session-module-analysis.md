@@ -1,3 +1,29 @@
+<!-- TOC -->
+* [Gooseのセッションモジュール解析](#gooseのセッションモジュール解析)
+  * [基本構造](#基本構造)
+  * [主要コンポーネント](#主要コンポーネント)
+    * [Session構造体](#session構造体)
+    * [実行モード](#実行モード)
+    * [CompletionCache構造体](#completioncache構造体)
+  * [主要機能](#主要機能)
+    * [セッション管理](#セッション管理)
+    * [対話処理](#対話処理)
+    * [プランニングモード](#プランニングモード)
+    * [例外処理](#例外処理)
+    * [コマンド補完](#コマンド補完)
+  * [process_agent_responseメソッドの詳細解析](#process_agent_responseメソッドの詳細解析)
+    * [1. レスポンスストリームの設定](#1-レスポンスストリームの設定)
+    * [2. 非同期メッセージ処理ループ](#2-非同期メッセージ処理ループ)
+    * [3. ツール確認リクエスト処理](#3-ツール確認リクエスト処理)
+    * [4. 通常メッセージの処理](#4-通常メッセージの処理)
+    * [5. エラー処理](#5-エラー処理)
+    * [6. 割り込み処理](#6-割り込み処理)
+    * [7. 処理の流れと特徴](#7-処理の流れと特徴)
+  * [セッションフロー](#セッションフロー)
+  * [特筆すべき設計ポイント](#特筆すべき設計ポイント)
+<!-- TOC -->
+
+
 # Gooseのセッションモジュール解析
 
 `crates/goose-cli/src/session/mod.rs`ファイルは、Gooseの対話型セッション管理を担当する中心的なモジュールです。このドキュメントでは、その機能と役割を詳細に解説します。
@@ -111,6 +137,170 @@ struct CompletionCache {
 2. **カスタム補完**：
    - `GooseCompleter`: カスタム補完ヘルパー
    - コンテキスト対応の補完機能
+
+## process_agent_responseメソッドの詳細解析
+
+`process_agent_response`メソッドはGooseの中核となる処理であり、AIエージェントとのやり取りを管理します。このメソッドは以下の重要な役割を果たしています：
+
+### 1. レスポンスストリームの設定
+
+```rust
+async fn process_agent_response(&mut self, interactive: bool) -> Result<()> {
+    let session_id = session::Identifier::Path(self.session_file.clone());
+    let mut stream = self
+        .agent
+        .reply(
+            &self.messages,
+            Some(SessionConfig {
+                id: session_id,
+                working_dir: std::env::current_dir()
+                    .expect("failed to get current session working directory"),
+            }),
+        )
+        .await?;
+    // ...
+}
+```
+
+- **セッションID**: セッションファイルのパスをセッション識別子として使用
+- **設定情報**: 作業ディレクトリなどの情報をエージェントに提供
+- **ストリーミング**: エージェントからの応答をストリームとして取得（チャンク単位で受信）
+
+### 2. 非同期メッセージ処理ループ
+
+```rust
+use futures::StreamExt;
+loop {
+    tokio::select! {
+        result = stream.next() => {
+            match result {
+                Some(Ok(message)) => {
+                    // メッセージ処理...
+                }
+                Some(Err(e)) => {
+                    // エラー処理...
+                }
+                None => break,
+            }
+        }
+        _ = tokio::signal::ctrl_c() => {
+            // Ctrl+C割り込み処理...
+        }
+    }
+}
+```
+
+- **非同期ストリーム**: `futures::StreamExt`を使用したストリーム処理
+- **tokio::select!**: 複数の非同期イベントを同時に待機
+  - ストリームからの次のメッセージ
+  - Ctrl+C割り込みシグナル
+- **マッチング処理**: 受信結果に応じた適切な処理分岐
+
+### 3. ツール確認リクエスト処理
+
+```rust
+if let Some(MessageContent::ToolConfirmationRequest(confirmation)) = message.content.first() {
+    output::hide_thinking();
+
+    // Format the confirmation prompt
+    let prompt = "Goose would like to call the above tool, do you approve?".to_string();
+
+    // Get confirmation from user
+    let confirmed = cliclack::confirm(prompt).initial_value(true).interact()?;
+    self.agent.handle_confirmation(confirmation.id.clone(), confirmed).await;
+}
+```
+
+- **確認リクエスト検出**: メッセージの先頭がツール確認リクエストの場合
+- **思考表示の非表示化**: ユーザーの確認を求める前に「考え中」表示を無効化
+- **ユーザー確認**: `cliclack::confirm`を使用した対話的な確認画面表示
+- **確認結果処理**: ユーザーの選択（承認/拒否）をエージェントに通知
+
+### 4. 通常メッセージの処理
+
+```rust
+else {
+    self.messages.push(message.clone());
+
+    // No need to update description on assistant messages
+    session::persist_messages(&self.session_file, &self.messages, None).await?;
+
+    if interactive {output::hide_thinking()};
+    output::render_message(&message, self.debug);
+    if interactive {output::show_thinking()};
+}
+```
+
+- **メッセージ追加**: 受信したメッセージを履歴に追加
+- **永続化**: メッセージをセッションファイルに保存（description更新なし）
+- **思考表示の管理**: 対話モードの場合、表示/非表示を切り替え
+- **メッセージレンダリング**: `output::render_message`を使用したメッセージ表示
+
+### 5. エラー処理
+
+```rust
+Some(Err(e)) => {
+    eprintln!("Error: {}", e);
+    drop(stream);
+    if let Err(e) = self.handle_interrupted_messages(false).await {
+        eprintln!("Error handling interruption: {}", e);
+    }
+    output::render_error(
+        "The error above was an exception we were not able to handle.\n\
+        These errors are often related to connection or authentication\n\
+        We've removed the conversation up to the most recent user message\n\
+        - depending on the error you may be able to continue",
+    );
+    break;
+}
+```
+
+- **エラー出力**: エラー内容のコンソール表示
+- **ストリーム破棄**: `drop(stream)`でストリームを解放
+- **割り込み処理**: `handle_interrupted_messages`メソッドによる状態復旧
+- **エラーメッセージ**: ユーザーへの説明メッセージ表示
+- **処理終了**: ループを抜けて処理を終了
+
+### 6. 割り込み処理
+
+```rust
+_ = tokio::signal::ctrl_c() => {
+    drop(stream);
+    if let Err(e) = self.handle_interrupted_messages(true).await {
+        eprintln!("Error handling interruption: {}", e);
+    }
+    break;
+}
+```
+
+- **シグナル検出**: `tokio::signal::ctrl_c()`によるCtrl+C検出
+- **ストリーム破棄**: 進行中のストリームを解放
+- **割り込み処理**: ユーザー起因の割り込みとして状態を復旧
+- **処理終了**: ループを抜けて処理を終了
+
+### 7. 処理の流れと特徴
+
+1. **ストリーミング応答**: 
+   - 大きなレスポンスを小さなチャンクで逐次処理
+   - ユーザーにリアルタイムフィードバックを提供
+
+2. **並行処理**:
+   - tokioのasync/await機能を活用
+   - メッセージ受信処理と割り込み検出を並行実行
+
+3. **インタラクティブ制御**:
+   - `interactive`フラグによる動作の切り替え
+   - 対話モードと非対話モードの両方をサポート
+
+4. **堅牢なエラー処理**:
+   - 様々なエラーケースに対応
+   - 接続問題や認証エラー時の回復処理
+
+5. **永続化との連携**:
+   - レスポンス受信ごとにセッション状態を更新
+   - メッセージ履歴の一貫性を維持
+
+このメソッドは、ユーザーとAIエージェント間の通信を管理するだけでなく、ツール確認、エラー処理、割り込み処理など、重要な対話要素を統合して制御する中心的な役割を果たしています。
 
 ## セッションフロー
 
