@@ -1,31 +1,3 @@
-<!-- TOC -->
-* [Gooseのリソースシステムとプラットフォームツール - MCPアーキテクチャ](#gooseのリソースシステムとプラットフォームツール---mcpアーキテクチャ)
-  * [MCPアーキテクチャの概要](#mcpアーキテクチャの概要)
-    * [MCP通信フロー](#mcp通信フロー)
-    * [MCPサーバーの実装方法](#mcpサーバーの実装方法)
-  * [リソースシステムの概要](#リソースシステムの概要)
-  * [リソースの構造](#リソースの構造)
-  * [ツール選択プロセス](#ツール選択プロセス)
-    * [ステージ1: LLMベースのツール選択](#ステージ1-llmベースのツール選択)
-    * [ステージ2: MCPクライアント/ツール解決](#ステージ2-mcpクライアントツール解決)
-  * [プラットフォームツール](#プラットフォームツール)
-    * [platform__read_resource](#platform__read_resource)
-    * [platform__list_resources](#platform__list_resources)
-  * [MCPとリソースシステムの関係](#mcpとリソースシステムの関係)
-    * [MCPサーバーのリソース機能実装](#mcpサーバーのリソース機能実装)
-    * [リソース機能の処理フロー](#リソース機能の処理フロー)
-  * [リソースシステムの使用例](#リソースシステムの使用例)
-    * [アクティブな拡張機能のリソース一覧取得](#アクティブな拡張機能のリソース一覧取得)
-    * [特定の拡張機能のリソース一覧取得](#特定の拡張機能のリソース一覧取得)
-    * [ファイルリソースの読み取り](#ファイルリソースの読み取り)
-  * [処理フロー例](#処理フロー例)
-  * [リソース対応拡張機能の例](#リソース対応拡張機能の例)
-  * [システムプロンプトでの表示](#システムプロンプトでの表示)
-  * [リソースの優先度とアクティブリソース](#リソースの優先度とアクティブリソース)
-  * [MCPアーキテクチャの利点](#mcpアーキテクチャの利点)
-  * [まとめ](#まとめ)
-<!-- TOC -->
-
 # Gooseのリソースシステムとプラットフォームツール - MCPアーキテクチャ
 
 このドキュメントでは、Gooseのリソースシステムとモデルコンテキストプロトコル（Model Context Protocol、MCP）アーキテクチャについて詳細に説明します。
@@ -122,7 +94,9 @@ pub struct Resource {
    - LLMがツールを使用すると判断した場合、そのレスポンスにツール呼び出しが含まれます
    - これはツール名と引数を持つ`MessageContent::ToolRequest`に変換されます
 
-LLMのツール呼び出しを変換するコード例（Google AI）:
+LLMのツール呼び出しを変換するコード例:
+
+**Google AI の場合:**
 
 ```rust
 if let Some(function_call) = part.get("functionCall") {
@@ -138,6 +112,86 @@ if let Some(function_call) = part.get("functionCall") {
                 Ok(ToolCall::new(&name, params.clone())),
             ));
         }
+    }
+}
+```
+
+**GCP Vertex AI (Gemini) の場合:**
+
+```rust
+// GCP Vertex AIでは、モデルに応じて異なる処理が必要
+pub fn response_to_message(response: Value, request_context: RequestContext) -> Result<Message> {
+    match request_context.provider() {
+        // Geminiモデルの場合はGoogleの実装を使用
+        ModelProvider::Google => {
+            let mut content = Vec::new();
+            let binding = vec![];
+            let candidates: &Vec<Value> = response
+                .get("candidates")
+                .and_then(|v| v.as_array())
+                .unwrap_or(&binding);
+            let candidate = candidates.first();
+            let role = Role::Assistant;
+            let created = chrono::Utc::now().timestamp();
+            
+            if candidate.is_none() {
+                return Ok(Message {
+                    role,
+                    created,
+                    content,
+                });
+            }
+            
+            let candidate = candidate.unwrap();
+            let parts = candidate
+                .get("content")
+                .and_then(|content| content.get("parts"))
+                .and_then(|parts| parts.as_array())
+                .unwrap_or(&binding);
+
+            for part in parts {
+                if let Some(text) = part.get("text").and_then(|v| v.as_str()) {
+                    content.push(MessageContent::text(text.to_string()));
+                } else if let Some(function_call) = part.get("functionCall") {
+                    // ランダムなIDを生成
+                    let id: String = rand::thread_rng()
+                        .sample_iter(&Alphanumeric)
+                        .take(8)
+                        .map(char::from)
+                        .collect();
+                    
+                    // 関数名を取得
+                    let name = function_call["name"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .to_string();
+                    
+                    // 関数名が有効か検証
+                    if !is_valid_function_name(&name) {
+                        let error = mcp_core::ToolError::NotFound(format!(
+                            "関数名 '{}' に無効な文字が含まれています。[a-zA-Z0-9_-]+ の正規表現に一致する必要があります",
+                            name
+                        ));
+                        content.push(MessageContent::tool_request(id, Err(error)));
+                    } else {
+                        // 引数を取得して処理
+                        if let Some(params) = function_call.get("args") {
+                            content.push(MessageContent::tool_request(
+                                id,
+                                Ok(ToolCall::new(&name, params.clone())),
+                            ));
+                        }
+                    }
+                }
+            }
+            Ok(Message {
+                role,
+                created,
+                content,
+            })
+        },
+        // Anthropicモデルの場合はAnthropicの実装を使用
+        ModelProvider::Anthropic => anthropic::response_to_message(response),
     }
 }
 ```
@@ -359,3 +413,345 @@ pub fn is_active(&self) -> bool {
 Gooseのリソースシステムは、MCP（Model Context Protocol）アーキテクチャを活用して、拡張機能から言語モデルへの効率的なデータ提供を実現しています。`platform__read_resource`と`platform__list_resources`ツールを通じて、LLMはこれらのリソースに簡単にアクセスでき、拡張機能側は標準化されたインターフェースを実装するだけでリソース機能を提供できます。
 
 このアーキテクチャにより、Gooseはコアシステムとその拡張機能の間にクリーンな分離を維持しながら、ファイルシステム、データベース、IDEのプロジェクトなど、様々なデータソースに接続できます。これにより、ユーザーのリクエストに対してより知識を持ったインテリジェントな応答を生成することが可能になります。
+
+# Gooseのツール管理メカニズム解析
+
+Gooseフレームワークでは、`get_prefixed_tools`メソッドとその周辺の処理が、AIモデルに提供するツールを管理する重要な役割を果たしています。この文書では、Gooseがどのようにツールを収集し、フィルタリングしているかを詳細に解説します。
+
+## ツール収集の基本プロセス
+
+`capabilities.rs`の`get_prefixed_tools`メソッドは、以下のように実装されています：
+
+```rust
+pub async fn get_prefixed_tools(&mut self) -> ExtensionResult<Vec<Tool>> {
+    let mut tools = Vec::new();
+    for (name, client) in &self.clients {
+        let client_guard = client.lock().await;
+        let mut client_tools = client_guard.list_tools(None).await?;
+
+        loop {
+            for tool in client_tools.tools {
+                tools.push(Tool::new(
+                    format!("{}__{}", name, tool.name),
+                    &tool.description,
+                    tool.input_schema,
+                ));
+            }
+
+            // exit loop when there are no more pages
+            if client_tools.next_cursor.is_none() {
+                break;
+            }
+
+            client_tools = client_guard.list_tools(client_tools.next_cursor).await?;
+        }
+    }
+    Ok(tools)
+}
+```
+
+このメソッドは、**登録されているすべての拡張機能（クライアント）からすべてのツールを収集し**、拡張機能名をプレフィックスとして追加したリストを返します。
+
+## ツールのフィルタリングと拡張
+
+しかし、実際には各Agent実装（`TruncateAgent`や`SummarizeAgent`など）の`reply`メソッド内で、特定の条件に基づいてツールが追加または除外されます。
+
+TruncateAgentの`reply`メソッドの先頭部分で以下の処理が行われています：
+
+```rust
+async fn reply(
+    &self,
+    messages: &[Message],
+    session: Option<SessionConfig>,
+) -> anyhow::Result<BoxStream<'_, anyhow::Result<Message>>> {
+    let mut messages = messages.to_vec();
+    let reply_span = tracing::Span::current();
+    let mut capabilities = self.capabilities.lock().await;
+    let mut tools = capabilities.get_prefixed_tools().await?;
+    let mut truncation_attempt: usize = 0;
+
+    // Load settings from config
+    let config = Config::global();
+    let goose_mode = config.get_param("GOOSE_MODE").unwrap_or("auto".to_string());
+
+    // we add in the 2 resource tools if any extensions support resources
+    // TODO: make sure there is no collision with another extension's tool name
+    let read_resource_tool = Tool::new(
+        "platform__read_resource".to_string(),
+        indoc! {r#"
+            Read a resource from an extension.
+            // ... description ...
+        "#}.to_string(),
+        json!({
+            // ... schema ...
+        }),
+    );
+
+    let list_resources_tool = Tool::new(
+        "platform__list_resources".to_string(),
+        indoc! {r#"
+            List resources from an extension(s).
+            // ... description ...
+        "#}.to_string(),
+        json!({
+            // ... schema ...
+        }),
+    );
+
+    if capabilities.supports_resources() {
+        tools.push(read_resource_tool);
+        tools.push(list_resources_tool);
+    }
+
+    let config = capabilities.provider().get_model_config();
+    let mut system_prompt = capabilities.get_system_prompt().await;
+    let mut toolshim_tools = vec![];
+    if config.toolshim {
+        // If tool interpretation is enabled, modify the system prompt to instruct to return JSON tool requests
+        system_prompt = modify_system_prompt_for_tool_json(&system_prompt, &tools);
+        // make a copy of tools before empty
+        toolshim_tools = tools.clone();
+        // pass empty tools vector to provider completion since toolshim will handle tool calls instead
+        tools = vec![];
+    }
+    
+    // ... 以下省略 ...
+```
+
+## ツール管理の主なポイント
+
+1. **基本ツールセットの取得**：
+- `capabilities.get_prefixed_tools().await?`で、すべての拡張機能から登録されているすべてのツールを取得
+
+2. **リソースツールの条件付き追加**：
+- リソース対応拡張機能が存在する場合（`capabilities.supports_resources()`が`true`の場合）のみ、2つの特殊なリソース関連ツールを追加：
+  - `platform__read_resource`：リソース読み取りツール
+  - `platform__list_resources`：リソース一覧取得ツール
+
+3. **ツールシム対応**（特にollama向け）：
+- `config.toolshim`が`true`の場合：
+  - システムプロンプトを修正してJSON形式のツールリクエストを指示
+  - 現在のツールのコピーを`toolshim_tools`として保存
+  - 実際に提供されるツールリストを空に設定（`tools = vec![]`）
+  - この場合、ツールはシステムプロンプト内の指示として組み込まれる
+
+4. **GOOSEモードによる実行時のツール処理**：
+- AIモデルがツールを呼び出そうとする場合、GOOSEモードに基づいて処理方法が決定される：
+  - `auto`モード：すべてのツールを自動的に実行
+  - `approve`モード：ユーザー承認が必要（事前に承認済みのものを除く）
+  - `smart_approve`モード：読み取り専用ツールは自動実行、それ以外は承認が必要
+  - `chat`モード：ツール実行をスキップし、代わりに説明を提供
+
+## 具体的なフィルタリングと選択ロジック
+
+1. **拡張機能レベルでのフィルタリング**：
+- `get_prefixed_tools`は基本的に**すべての拡張機能からすべてのツールを収集**
+- 特定の拡張機能を除外するようなフィルタリングは行われない
+
+2. **ツールレベルでのフィルタリング**：
+- **追加のみ**：基本セットのツールは除外されず、特定の条件下で追加のツールが追加される
+- **リソースツール**：リソース対応拡張機能がある場合のみ追加される特殊なツール
+- **ツールシム**：特定の提供者（主にollama）の場合、特殊な処理が行われる
+
+3. **実行時のフィルタリング**：
+- `smart_approve`モードでは、`detect_read_only_tools`関数を使用して読み取り専用ツールを検出
+- 実行前にツールの属性に基づいた選別が行われる
+
+4. **get_plan_prompt時のツール処理**：
+- 計画生成時には、ツールの情報（名前、説明、パラメータ名）が抽出され、計画プロンプトに含まれる
+   ```rust
+   async fn get_plan_prompt(&self) -> anyhow::Result<String> {
+       let mut capabilities = self.capabilities.lock().await;
+       let tools = capabilities.get_prefixed_tools().await?;
+       let tools_info = tools
+           .into_iter()
+           .map(|tool| ToolInfo::new(&tool.name, &tool.description, get_parameter_names(&tool)))
+           .collect();
+
+       let plan_prompt = capabilities.get_planning_prompt(tools_info).await;
+
+       Ok(plan_prompt)
+   }
+   ```
+
+## 結論
+
+Gooseのツール管理メカニズムには以下の特徴があります：
+
+1. **包括的収集**：基本的にはすべての拡張機能からすべてのツールを収集
+2. **条件付き追加**：特定の条件（リソース対応など）に基づいて特殊なツールを追加
+3. **モデル依存の処理**：一部のモデル（ollama）では特殊な処理を行う
+4. **実行時フィルタリング**：GOOSEモードや他の条件に基づいてツール実行を制御
+
+重要なのは、**ツールの除外**というよりも、**必要に応じたツールの追加**が行われていることです。これにより、拡張機能が提供するすべての機能をユーザーが利用できるようになっています。ただし、特定の条件下では、特殊なツールが追加されたり、ツールの処理方法が変わったりします。
+
+# Gooseのアーキテクチャ: MCP、Tool、Resource、Extensionの関係
+
+Gooseの様々な概念（MCP、Tool、Resource、Extension）について整理し、それぞれの役割と関係性を説明します。
+
+## 主要概念の説明
+
+### Extension（拡張機能）
+拡張機能は、Gooseの基本機能を拡張するモジュールです。各拡張機能は特定の機能セット（ファイル操作、IDE連携、メモリ管理など）を提供します。拡張機能はGooseのコアから分離された形で動作し、MCPを通じて通信します 。
+
+### MCP（Model Context Protocol）
+MCPは拡張機能とGooseコアの間の通信プロトコルです。これにより、拡張機能が独立したプロセスやサービスとして実行でき、標準化されたインターフェースを通じてGooseと通信できます。MCPはクライアント・サーバーモデル に基づいています：
+- **MCPサーバー**: 各拡張機能が実装するサーバー
+- **MCPクライアント**: Gooseコアが各拡張機能と通信するためのクライアント
+
+### Tool（ツール）
+ツールは、拡張機能が提供する具体的な機能（関数）です。各ツールには名前、説明、パラメータスキーマがあり、LLMがこれらの情報を使って適切なツールを選択し、呼び出すことができます。例えば：
+- `developer__shell`: シェルコマンドを実行するツール
+- `memory__remember_memory`: 情報を保存するツール
+- `platform__read_resource`: リソースを読み取るツール
+
+### Resource（リソース）
+リソースは拡張機能からLLMに提供されるデータです。ファイルの内容、データベーススキーマ、ドキュメントなど様々な種類があります。リソースには一意のURIがあり、`platform__read_resource`ツールを使って読み取ることができます。
+
+## 関係性の図解
+
+```mermaid
+%%{init: { 'theme': 'monokai' } }%%
+graph TD
+    subgraph "Gooseコア"
+        Core[Gooseコア] --> LLM[LLM]
+        Core --> MC[MCPクライアント]
+        LLM --- PT[プラットフォームツール]
+        PT --> RR["platform__read_resource"]
+        PT --> LR["platform__list_resources"]
+    end
+
+    subgraph "拡張機能群"
+        Ex1[開発者拡張機能] --> MS1[MCPサーバー1]
+        Ex2[メモリ拡張機能] --> MS2[MCPサーバー2]
+        Ex3[JetBrains拡張機能] --> MS3[MCPサーバー3]
+    end
+
+    MC --- JSON[JSON-RPC] --- MS1 & MS2 & MS3
+
+    subgraph "ツール"
+        MS1 --> T1["developer__shell"]
+        MS1 --> T2["developer__text_editor"]
+        MS2 --> T3["memory__remember_memory"]
+        MS2 --> T4["memory__retrieve_memories"]
+        MS3 --> T5["jetbrains__get_file_text"]
+    end
+
+    subgraph "リソース"
+        MS1 --> R1["ファイル (file:///path)"]
+        MS2 --> R2["保存されたメモリ"]
+        MS3 --> R3["IDE内のファイル"]
+    end
+
+    RR --> R1 & R2 & R3
+    LR --> R1 & R2 & R3
+```
+
+## 概念間の連携フロー
+
+```mermaid
+%%{init: { 'theme': 'monokai' } }%%
+sequenceDiagram
+    participant User as ユーザー
+    participant Core as Gooseコア
+    participant LLM as LLM
+    participant MC as MCPクライアント
+    participant MS as MCPサーバー（拡張機能）
+    participant Tool as ツール
+    participant Resource as リソース
+
+    User->>Core: 命令を入力
+    Core->>LLM: 命令、システムプロンプト、<br>利用可能なツール情報を送信
+    LLM->>Core: ツール呼び出しを含むレスポンス
+    Core->>MC: ツール呼び出しを転送
+    MC->>MS: JSON-RPCを使って<br>拡張機能に要求を送信
+    MS->>Tool: 指定されたツールを実行
+    alt リソース要求の場合
+        Tool->>Resource: リソースにアクセス
+        Resource->>Tool: リソースデータを返す
+    end
+    Tool->>MS: 実行結果
+    MS->>MC: 結果を返す
+    MC->>Core: 結果を返す
+    Core->>LLM: 結果を含む会話更新
+    LLM->>Core: 最終レスポンス
+    Core->>User: レスポンスを表示
+```
+
+## 各概念の詳細解説
+
+### 1. Extension（拡張機能）
+- **定義**: Gooseの機能を拡張するモジュール
+- **特徴**:
+  - 独立したプロセスとして動作可能
+  - 様々な実装方法（組み込み型、標準入出力型、SSE型）
+  - 特定のドメインの機能を提供（ファイル操作、メモリ管理など）
+- **例**:
+  - `developer`: ファイル操作、シェルコマンド実行などの開発者向け機能
+  - `memory`: 情報の永続的な保存と取得
+  - `jetbrains`: JetBrains IDE（IntelliJ IDEAなど）との連携
+
+### 2. MCP（Model Context Protocol）
+- **定義**: 拡張機能とGooseコア間の通信プロトコル
+- **特徴**:
+  - クライアント・サーバーモデル
+  - JSON-RPCベースの通信
+  - 標準化されたインターフェース
+- **コンポーネント**:
+  - **MCPサーバー**: 各拡張機能内に実装されるサーバー
+  - **MCPクライアント**: Gooseコア内に実装されるクライアント
+
+### 3. Tool（ツール）
+- **定義**: 拡張機能が提供する具体的な機能
+- **特徴**:
+  - 名前、説明、パラメータスキーマを持つ
+  - 名前には拡張機能名の接頭辞が付く（例: `developer__shell`）
+  - JSONスキーマ形式で定義される
+- **呼び出しプロセス**:
+  1. LLMがツールの選択とパラメータ設定を行う
+  2. GooseコアがToolRequestを生成
+  3. MCPクライアントが適切な拡張機能にリクエストを送信
+  4. 拡張機能がツールを実行し結果を返す
+
+### 4. Resource（リソース）
+- **定義**: 拡張機能がLLMに提供するデータ
+- **特徴**:
+  - URI（例: `file:///path/to/file`）で識別される
+  - MIME typeを持つ（主に「text」または「blob」）
+  - 優先度（0.0〜1.0）により重要性が決まる
+- **アクセス方法**:
+  - `platform__read_resource`ツールでURIを指定して読み取り
+  - `platform__list_resources`ツールで利用可能なリソース一覧を取得
+
+## 概念間の関係性
+
+1. **Extension ⇔ MCP**:
+- 拡張機能はMCPサーバーを実装して、Gooseコアと通信します
+- MCPによって、拡張機能は独立したプロセスとして動作できます
+
+2. **Extension ⇔ Tool**:
+- 拡張機能は複数のツールを提供します
+- ツールは拡張機能の機能にアクセスするための標準化されたインターフェースです
+
+3. **Extension ⇔ Resource**:
+- 拡張機能はリソースを提供します
+- リソースは拡張機能が持つデータをLLMに利用可能にします
+
+4. **Tool ⇔ Resource**:
+- `platform__read_resource`のようなプラットフォームツールを使って、リソースにアクセスできます
+- 一部のツールはリソースを操作・生成します
+
+5. **MCP ⇔ Tool**:
+- MCPプロトコルはツール呼び出しの転送と結果の受け取りを担当します
+- ツール呼び出しのパラメータと結果はJSONとして受け渡しされます
+
+## まとめ
+
+Gooseのアーキテクチャでは：
+
+- **Extension（拡張機能）**は機能の論理的なグループ化と分離を提供
+- **MCP（Model Context Protocol）**は拡張機能との標準化された通信を実現
+- **Tool（ツール）**は拡張機能の具体的な機能へのアクセスを提供
+- **Resource（リソース）**は拡張機能のデータをLLMに利用可能にする
+
+これらの概念が連携することで、Gooseは柔軟で拡張性のあるAIアシスタントとして機能します。拡張機能は独立して開発・実行でき、ツールとリソースを通じてLLMの能力を拡張します。MCPプロトコルがこれらの要素を結びつけ、統一されたシステムとして機能させています。
