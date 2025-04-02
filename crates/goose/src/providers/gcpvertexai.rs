@@ -319,7 +319,7 @@ impl GcpVertexAIProvider {
             let status = response.status();
 
             // If not a 429, process normally
-            if status != StatusCode::TOO_MANY_REQUESTS {
+            if status != StatusCode::TOO_MANY_REQUESTS || status != 529 {
                 let response_json = response.json::<Value>().await.map_err(|e| {
                     ProviderError::RequestFailed(format!("Failed to parse response: {e}"))
                 })?;
