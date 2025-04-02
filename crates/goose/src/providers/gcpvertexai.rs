@@ -318,60 +318,69 @@ impl GcpVertexAIProvider {
 
             let status = response.status();
 
-            // If not a 429, process normally
-            if status != StatusCode::TOO_MANY_REQUESTS || status != 529 {
-                let response_json = response.json::<Value>().await.map_err(|e| {
-                    ProviderError::RequestFailed(format!("Failed to parse response: {e}"))
-                })?;
+            // Handle 429 Too Many Requests or 529 server errors
+            if status == StatusCode::TOO_MANY_REQUESTS || status.as_u16() == 529 {
+                // Handle rate limit or server error with retry logic
+                attempts += 1;
 
-                return match status {
-                    StatusCode::OK => Ok(response_json),
-                    StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
-                        tracing::debug!(
-                            "Authentication failed. Status: {status}, Payload: {payload:?}"
-                        );
-                        Err(ProviderError::Authentication(format!(
-                            "Authentication failed: {response_json:?}"
-                        )))
+                // Try to parse response for more detailed error info
+                let cite_gcp_vertex_429 =
+                    "See https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429";
+                let response_text = response.text().await.unwrap_or_default();
+                let error_message = if status == StatusCode::TOO_MANY_REQUESTS {
+                    if response_text.contains("Exceeded the Provisioned Throughput") {
+                        format!("Exceeded the Provisioned Throughput: {cite_gcp_vertex_429}.")
+                    } else {
+                        format!("Pay-as-you-go resource exhausted: {cite_gcp_vertex_429}.")
                     }
-                    _ => {
-                        tracing::debug!(
-                            "Request failed. Status: {status}, Response: {response_json:?}"
-                        );
-                        Err(ProviderError::RequestFailed(format!(
-                            "Request failed with status {status}: {response_json:?}"
-                        )))
-                    }
+                } else {
+                    format!("Server error (status 529). Retrying request.")
                 };
+
+                tracing::warn!(
+                    "Rate limit or server error (status {}) (attempt {}/{}): {}. Retrying after backoff...",
+                    status,
+                    attempts,
+                    self.retry_config.max_retries,
+                    error_message
+                );
+
+                // Store the error in case we need to return it after max retries
+                last_error = Some(ProviderError::RateLimitExceeded(error_message));
+
+                // Calculate and apply the backoff delay
+                let delay = self.retry_config.delay_for_attempt(attempts);
+                tracing::info!("Backing off for {:?} before retry", delay);
+                sleep(delay).await;
+                continue;
             }
 
-            // Handle 429 Too Many Requests
-            attempts += 1;
+            // Process normal response
+            let response_json = response.json::<Value>().await.map_err(|e| {
+                ProviderError::RequestFailed(format!("Failed to parse response: {e}"))
+            })?;
 
-            // Try to parse response for more detailed error info
-            let cite_gcp_vertex_429 =
-                "See https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429";
-            let response_text = response.text().await.unwrap_or_default();
-            let quota_error = if response_text.contains("Exceeded the Provisioned Throughput") {
-                format!("Exceeded the Provisioned Throughput: {cite_gcp_vertex_429}.")
-            } else {
-                format!("Pay-as-you-go resource exhausted: {cite_gcp_vertex_429}.")
+            return match status {
+                StatusCode::OK => Ok(response_json),
+                StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
+                    tracing::debug!(
+                        "Authentication failed. Status: {status}, Payload: {payload:?}"
+                    );
+                    Err(ProviderError::Authentication(format!(
+                        "Authentication failed: {response_json:?}"
+                    )))
+                }
+                _ => {
+                    tracing::debug!(
+                        "Request failed. Status: {status}, Response: {response_json:?}"
+                    );
+                    Err(ProviderError::RequestFailed(format!(
+                        "Request failed with status {status}: {response_json:?}"
+                    )))
+                }
             };
 
-            tracing::warn!(
-                "Rate limit exceeded (attempt {}/{}): {}. Retrying after backoff...",
-                attempts,
-                self.retry_config.max_retries,
-                quota_error
-            );
 
-            // Store the error in case we need to return it after max retries
-            last_error = Some(ProviderError::RateLimitExceeded(quota_error));
-
-            // Calculate and apply the backoff delay
-            let delay = self.retry_config.delay_for_attempt(attempts);
-            tracing::info!("Backing off for {:?} before retry", delay);
-            sleep(delay).await;
         }
     }
 
