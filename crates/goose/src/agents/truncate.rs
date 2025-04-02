@@ -235,6 +235,21 @@ impl Agent for TruncateAgent {
             tools.push(list_resources_tool);
         }
 
+        let (tools_with_readonly_annotation, tools_without_annotation): (Vec<String>, Vec<String>) =
+            tools.iter().fold((vec![], vec![]), |mut acc, tool| {
+                match &tool.annotations {
+                    Some(annotations) => {
+                        if annotations.read_only_hint {
+                            acc.0.push(tool.name.clone());
+                        }
+                    }
+                    None => {
+                        acc.1.push(tool.name.clone());
+                    }
+                }
+                acc
+            });
+
         let config = capabilities.provider().get_model_config();
         let mut system_prompt = capabilities.get_system_prompt().await;
         let mut toolshim_tools = vec![];
@@ -280,6 +295,8 @@ impl Agent for TruncateAgent {
                             let mut metadata = session::read_metadata(&session_file)?;
                             metadata.working_dir = session.working_dir;
                             metadata.total_tokens = usage.usage.total_tokens;
+                            metadata.input_tokens = usage.usage.input_tokens;
+                            metadata.output_tokens = usage.usage.output_tokens;
                             // The message count is the number of messages in the session + 1 for the response
                             // The message count does not include the tool response till next iteration
                             metadata.message_count = messages.len() + 1;
@@ -310,30 +327,40 @@ impl Agent for TruncateAgent {
                         let mode = goose_mode.clone();
                         match mode.as_str() {
                             "approve" | "smart_approve" => {
-                                let mut read_only_tools = Vec::new();
                                 let mut needs_confirmation = Vec::<&ToolRequest>::new();
                                 let mut approved_tools = Vec::new();
+                                let mut llm_detect_candidates = Vec::<&ToolRequest>::new();
+                                let mut detected_read_only_tools = Vec::new();
 
                                 // First check permissions for all tools
                                 let store = ToolPermissionStore::load()?;
                                 for request in tool_requests.iter() {
                                     if let Ok(tool_call) = request.tool_call.clone() {
-                                        if let Some(allowed) = store.check_permission(request) {
+                                        if tools_with_readonly_annotation.contains(&tool_call.name) {
+                                            approved_tools.push((request.id.clone(), tool_call));
+                                        } else if let Some(allowed) = store.check_permission(request) {
                                             if allowed {
                                                 // Instead of executing immediately, collect approved tools
                                                 approved_tools.push((request.id.clone(), tool_call));
                                             } else {
+                                                // If the tool doesn't have any annotation, we can use llm-as-a-judge to check permission.
+                                                if tools_without_annotation.contains(&tool_call.name) {
+                                                    llm_detect_candidates.push(request);
+                                                }
                                                 needs_confirmation.push(request);
                                             }
                                         } else {
+                                            if tools_without_annotation.contains(&tool_call.name) {
+                                                llm_detect_candidates.push(request);
+                                            }
                                             needs_confirmation.push(request);
                                         }
                                     }
                                 }
 
-                                // Only check read-only status for tools needing confirmation
-                                if !needs_confirmation.is_empty() && mode == "smart_approve" {
-                                    read_only_tools = detect_read_only_tools(&capabilities, needs_confirmation.clone()).await;
+                                // Only check read-only status for tools without annotation
+                                if !llm_detect_candidates.is_empty() && mode == "smart_approve" {
+                                    detected_read_only_tools = detect_read_only_tools(&capabilities, llm_detect_candidates.clone()).await;
                                 }
 
                                 // Handle pre-approved and read-only tools in parallel
@@ -349,7 +376,7 @@ impl Agent for TruncateAgent {
                                 for request in &needs_confirmation {
                                     if let Ok(tool_call) = request.tool_call.clone() {
                                         // Skip confirmation if the tool_call.name is in the read_only_tools list
-                                        if read_only_tools.contains(&tool_call.name) {
+                                        if detected_read_only_tools.contains(&tool_call.name) {
                                             let tool_future = Self::create_tool_future(&capabilities, tool_call, request.id.clone());
                                             tool_futures.push(tool_future);
                                         } else {
@@ -377,7 +404,10 @@ impl Agent for TruncateAgent {
                                                         // User declined - add declined response
                                                         message_tool_response = message_tool_response.with_tool_response(
                                                             request.id.clone(),
-                                                            Ok(vec![Content::text("User declined to run this tool. Don't try to make the same tool call again. If there is no other ways to do it, it is ok to stop.")]),
+                                                            Ok(vec![Content::text(
+                                                                "The user has declined to run this tool. \
+                                                                DO NOT attempt to call this tool again. \
+                                                                If there are no alternative methods to proceed, clearly explain the situation and STOP.")]),
                                                         );
                                                     }
                                                     break; // Exit the loop once the matching `req_id` is found
