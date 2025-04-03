@@ -1,9 +1,8 @@
 // An example script to run an MCP server
 use anyhow::Result;
+use serde_json::json;
 use goose_mcp::MemoryRouter;
-use mcp_server::router::RouterService;
-use mcp_server::{ByteTransport, Server};
-use tokio::io::{stdin, stdout};
+use mcp_server::Router;
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::{self, EnvFilter};
 
@@ -24,13 +23,33 @@ async fn main() -> Result<()> {
 
     tracing::info!("Starting MCP server");
 
-    // Create an instance of our counter router
-    let router = RouterService(MemoryRouter::new());
-
-    // Create and run the server
-    let server = Server::new(router);
-    let transport = ByteTransport::new(stdin(), stdout());
-
-    tracing::info!("Server initialized and ready to handle requests");
-    Ok(server.run(transport).await?)
+    // Create an instance of our memory router
+    let memory_router = MemoryRouter::new();
+    println!("Router created with instructions: {}", memory_router.get_instructions());
+    println!("Available tools: {}", serde_json::to_string_pretty(&memory_router.list_tools())?);
+    println!("Available resources: {:?}", memory_router.list_resources());
+    println!("Available prompts: {:?}", memory_router.list_prompts());
+    
+    // Retrieve memories using await since call_tool returns a Future
+    let memories_result = memory_router.call_tool("retrieve_memories",  json!({
+        "category": "github_workflow",
+        "is_global": true,
+    })).await;
+    let pretty_json = serde_json::to_string_pretty(memories_result?.get(0).unwrap())?;
+    println!("Memories: {}", pretty_json);
+    
+    // Note: The following code can be uncommented to run a full MCP server
+    // instead of just demonstrating the memory router functionality
+    //
+    // // Create a router service wrapping our memory router
+    // // let router_service = mcp_server::router::RouterService(memory_router);
+    // // 
+    // // // Create and run the server
+    // // let server = mcp_server::Server::new(router_service);
+    // // let transport = mcp_server::ByteTransport::new(tokio::io::stdin(), tokio::io::stdout());
+    // //
+    // // tracing::info!("Server initialized and ready to handle requests");
+    // // server.run(transport).await?;
+    
+    Ok(())
 }
