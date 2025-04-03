@@ -187,3 +187,179 @@ pub fn clear_memory(&self, category: &str, is_global: bool) -> io::Result<()>
    - 重要なセッションでは、セッション開始時に`--with-builtin memory`を指定することで、メモリを確実に読み込ませる
    - メモリに特殊な指示を保存する場合は、その動作タイミングを理解しておく
    - セッション中に追加したメモリは、次回のセッションまで反映されないことを考慮する
+
+## 「〇〇を思い出してください」の処理フロー
+
+「〇〇を思い出してください」のような命令に対するGooseの処理フローについて詳しく説明します。ここには重要な区別があります：
+
+1. **Extensionのインストラクション読み込み**：セッション開始時
+2. **メモリの内容の読み込み**：メモリツール初回使用時
+
+## インストラクション適用の内部実装
+
+Gooseは開始時に拡張機能のインストラクションを読み込み、言語モデルに提供するように実装されています。読み込み後はシステムプロンプトに含まれています。具体的には以下のコード部分が関係しています：
+
+### 1. 拡張機能初期化フロー
+
+`crates/goose-cli/src/session/builder.rs`の`build_session`関数では、セッション開始時に、有効化されている全ての拡張機能が読み込まれます：
+
+```rust
+// Setup extensions for the agent
+for extension in ExtensionManager::get_all().expect("should load extensions") {
+    if extension.enabled {
+        let config = extension.config.clone();
+        agent
+            .add_extension(config.clone())
+            .await
+            .unwrap_or_else(|e| {
+                let err = match e {
+                    ExtensionError::Transport(McpClientError::StdioProcessError(inner)) => {
+                        inner
+                    }
+                    _ => e.to_string(),
+                };
+                println!("Failed to start extension: {}, {:?}", config.name(), err);
+                println!("Please check extension configuration for {}.", config.name());
+                process::exit(1);
+            });
+    }
+}
+```
+
+### 2. インストラクションの保存
+
+`crates/goose/src/agents/capabilities.rs`の`add_extension`メソッドが当てられ、拡張機能のインストラクションを保持します：
+
+```rust
+// Store instructions if provided
+if let Some(instructions) = init_result.instructions {
+    self.instructions
+        .insert(sanitized_name.clone(), instructions);
+}
+```
+
+### 3. システムプロンプトの生成
+
+`crates/goose/src/agents/capabilities.rs`の`get_system_prompt`メソッドでは、拡張機能のインストラクションを含むシステムプロンプトが作成されます：
+
+```rust
+async fn get_system_prompt(&self) -> String {
+    let mut context: HashMap<&str, Value> = HashMap::new();
+
+    let extensions_info: Vec<ExtensionInfo> = self
+        .clients
+        .keys()
+        .map(|name| {
+            let instructions = self.instructions.get(name).cloned().unwrap_or_default();
+            let has_resources = self.resource_capable_extensions.contains(name);
+            ExtensionInfo::new(name, &instructions, has_resources)
+        })
+        .collect();
+    context.insert("extensions", serde_json::to_value(extensions_info).unwrap());
+
+    // ...
+    
+    // システムプロンプトテンプレートに各拡張のインストラクションを渡す
+    prompt_template::render_global_file("system.md", &context)
+        .expect("Prompt should render")
+}
+```
+
+### 4. システムプロンプトテンプレート
+
+`crates/goose/src/prompts/system.md`テンプレートでは、拡張機能のインストラクションが以下のようにレンダリングされます：
+
+```markdown
+{% for extension in extensions %}
+## {{extension.name}}
+{% if extension.has_resources %}
+{{extension.name}} supports resources, you can use platform__read_resource,
+and platform__list_resources on this extension.
+{% endif %}
+{% if extension.instructions %}### Instructions
+{{extension.instructions}}{% endif %}
+{% endfor %}
+```
+
+このように、memory extensionのインストラクションは、**セッション開始時に**他の拡張機能と同様にシステムプロンプトに読み込まれ、言語モデルに提供されます。これにより、言語モデルは「思い出してください」という問いが来た時から、既にインストラクションに基づき、適切なmemoryツールを呼び出すことができるようになっています。
+
+### リクエスト処理の流れ
+
+```mermaid
+%%{init: { 'theme': 'monokai' } }%%
+sequenceDiagram
+    participant User as ユーザー
+    participant LLM as 言語モデル
+    participant MemExt as Memory拡張
+    participant Storage as ファイルストレージ
+    
+    Note over User,LLM: セッション開始時
+    Note over LLM: memory extensionの<br>インストラクションは<br>既にシステムプロンプト<br>として読み込み済み
+    
+    User->>LLM: 「〇〇を思い出してください」
+    LLM->>LLM: インストラクションに基づき<br>memory__retrieve_memoriesを<br>呼び出すべきと判断
+    LLM->>MemExt: memory__retrieve_memories呼び出し
+    
+    alt 初めてのメモリツール使用
+        MemExt->>MemExt: メモリ拡張を初期化
+        MemExt->>Storage: 保存されているメモリを読み込み
+        Storage->>MemExt: メモリデータを返す
+        MemExt->>LLM: メモリの内容をシステムプロンプトに追加
+    end
+    
+    MemExt->>LLM: 検索結果を返す
+    LLM->>User: 思い出した情報を表示
+```
+
+### キーワード判断のメカニズム
+
+memory extensionのインストラクションには、以下のようなキーワードトリガーのリストが含まれています：
+
+```
+Keywords that trigger memory tools:
+- "remember"
+- "forget"
+- "memory"
+- "save"
+- "save memory"
+- "remove memory"
+- "clear memory"
+- "search memory"
+- "find memory"
+```
+
+日本語では「思い出して」「覚えて」「記憶して」などの言葉が、これらのトリガーキーワードに対応します。
+
+### 実際の処理フロー
+
+1. **セッション開始時**：
+   - memory extensionが有効化されている場合、そのインストラクション（使い方の説明）はシステムプロンプトの一部として既に読み込まれています
+   - しかし、保存されているメモリの内容はまだ読み込まれていません
+
+2. **ユーザーが「〇〇を思い出してください」と入力**：
+   - 言語モデル（GPT-4やClaude等）がシステムプロンプトに含まれるmemory extensionのインストラクションを参照
+   - 「思い出して」をメモリトリガーキーワードとして認識
+   - `memory__retrieve_memories`ツールを呼び出すべきと判断
+
+3. **初めてメモリツールを使用する場合**：
+   - memory extensionが初期化され、保存されているメモリファイルが読み込まれる
+   - 読み込まれたメモリ内容がシステムプロンプトに追加される
+   - メモリに「このファイルが読み込まれたら〇〇と言ってください」のような指示があれば、その時点で実行される
+
+4. **メモリ検索の実行**：
+   - 指定されたカテゴリ（または全カテゴリ）のメモリが検索される
+   - 検索結果が言語モデルに返される
+
+5. **応答の生成**：
+   - 言語モデルが検索結果を基に応答を生成
+   - ユーザーに思い出した情報を提示
+
+### 重要なポイント
+
+- **2つの異なる読み込み**：
+  - **インストラクション**（どう動くべきかの説明）はセッション開始時に読み込まれる
+  - **メモリの内容**（保存されていた情報）は初めてメモリツールを使うときに読み込まれる
+
+- **インストラクションの優先度**：
+  - memory extensionのインストラクションは、他のextensionのインストラクションと同様に、言語モデルの行動を導くガイドラインとして機能する
+  - 言語モデルは、これらのインストラクションを基に、どのツールを使うべきかを判断する
