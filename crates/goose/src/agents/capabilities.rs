@@ -115,6 +115,7 @@ impl Capabilities {
             ExtensionConfig::Sse {
                 uri, envs, timeout, ..
             } => {
+                println!("Adding SSE extension: {}", uri);
                 let transport = SseTransport::new(uri, envs.get_env());
                 let handle = transport.start().await?;
                 let service = McpService::with_timeout(
@@ -132,6 +133,7 @@ impl Capabilities {
                 timeout,
                 ..
             } => {
+                println!("Adding Stdio extension: {}({})", cmd, args.join(","));
                 let transport = StdioTransport::new(cmd, args.to_vec(), envs.get_env());
                 let handle = transport.start().await?;
                 let service = McpService::with_timeout(
@@ -154,6 +156,7 @@ impl Capabilities {
                     .to_str()
                     .expect("should resolve executable to string path")
                     .to_string();
+                println!("Adding builtin extension: {}, cmd: {}", name, &cmd);
                 let transport = StdioTransport::new(
                     &cmd,
                     vec!["mcp".to_string(), name.clone()],
@@ -186,6 +189,7 @@ impl Capabilities {
 
         // Store instructions if provided
         if let Some(instructions) = init_result.instructions {
+            // println!("!!INSTRUCTIONS!!:\n========\n\n{}\n\n========", &instructions);
             self.instructions
                 .insert(sanitized_name.clone(), instructions);
         }
@@ -352,6 +356,15 @@ impl Capabilities {
             system_prompt_extensions
                 .push("Right now you are *NOT* in the chat only mode and have access to tool use and system.".to_string());
         }
+
+        println!(
+            "!!SYSTEM PROMPT!!:\n========\n\n{}\n\n========",
+            format!(
+                "{}\n\n# Additional Instructions:\n\n{}",
+                base_prompt,
+                system_prompt_extensions.join("\n\n")
+            )
+        );
 
         if system_prompt_extensions.is_empty() {
             base_prompt

@@ -18,7 +18,7 @@ pub async fn build_session(
     debug: bool,
 ) -> Session {
     println!("DEBUG: build_session start");
-    
+
     // Load config and get provider/model
     println!("DEBUG: Loading config");
     let config = Config::global();
@@ -35,7 +35,7 @@ pub async fn build_session(
         .get_param("GOOSE_MODEL")
         .expect("No model configured. Run 'goose configure' first");
     println!("DEBUG: Model name: {}", model);
-    
+
     println!("DEBUG: Creating model config");
     let model_config = goose::model::ModelConfig::new(model.clone());
     println!("DEBUG: Creating provider");

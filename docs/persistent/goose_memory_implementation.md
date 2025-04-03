@@ -49,6 +49,132 @@ Gooseのメモリ機能は、**起動時には自動的に初期化されない*
 
 4. **設定ファイルで事前に有効化されていた場合**
 
+## 拡張機能の初期化とインストラクション処理
+
+拡張機能が初期化される際には、内部的に以下のようなプロセスが実行されます：
+
+### 1. Agent側での拡張機能の初期化:
+
+Agentクラスの `add_extension` メソッドが呼び出され、以下の処理が実行されます:
+
+```rust
+// Capabilities::add_extension メソッド内の処理
+// クライアントをセットアップと初期化
+let client = /* 拡張機能のタイプに応じてセットアップ */;
+
+// 初期化処理を実行し、結果を取得
+let init_result = client
+    .initialize(info, capabilities)
+    .await
+    .map_err(|e| ExtensionError::Initialization(config.clone(), e))?;
+
+let sanitized_name = normalize(config.key().to_string());
+
+// 重要: 拡張機能が提供するインストラクションを保存
+if let Some(instructions) = init_result.instructions {
+    println!("!!INSTRUCTIONS!!:\n========\n\n{}\n\n========", &instructions);
+    self.instructions
+        .insert(sanitized_name.clone(), instructions);
+}
+
+// リソース機能をサポートしている場合はそれを記録
+if init_result.capabilities.resources.is_some() {
+    self.resource_capable_extensions
+        .insert(sanitized_name.clone());
+}
+```
+
+この処理によって:
+1. 各拡張機能から返されるインストラクション（使用方法や機能説明など）が保存される
+2. 各拡張機能がリソース機能をサポートしているかどうかが記録される
+3. 拡張機能のクライアントインスタンスが保存される
+
+### 2. Memory拡張機能の初期化処理:
+
+メモリ拡張機能が初期化されるとき、以下のような処理が実行されます:
+
+```rust
+// MemoryRouter::new() メソッド内
+let mut memory_router = Self {
+    tools: vec![/* ツール定義 */],
+    instructions: instructions.clone(),
+    global_memory_dir,
+    local_memory_dir,
+};
+
+// グローバルメモリとローカルメモリを読み込む
+let retrieved_global_memories = memory_router.retrieve_all(true);
+let retrieved_local_memories = memory_router.retrieve_all(false);
+
+let mut updated_instructions = instructions;
+
+// 読み込んだメモリ内容をインストラクションに追加
+if let Ok(global_memories) = retrieved_global_memories {
+    if !global_memories.is_empty() {
+        updated_instructions.push_str("\n\nGlobal Memories:\n");
+        for (category, memories) in global_memories {
+            updated_instructions.push_str(&format!("\nCategory: {}\n", category));
+            for memory in memories {
+                updated_instructions.push_str(&format!("- {}\n", memory));
+            }
+        }
+    }
+}
+
+// ローカルメモリも同様に追加
+if let Ok(local_memories) = retrieved_local_memories {
+    // ... 同様の処理
+}
+
+// 更新されたインストラクションを設定
+memory_router.set_instructions(updated_instructions);
+```
+
+### 3. インストラクション情報のシステムプロンプトへの組み込み:
+
+送信される時、このget_system_promptはagent.replyに毎回呼ばれてることがわかった！
+拡張機能のインストラクションは、システムプロンプトの生成時に組み込まれます:
+
+```rust
+// capabilities.rs の get_system_prompt() メソッド
+async fn get_system_prompt(&self) -> String {
+    let mut context: HashMap<&str, Value> = HashMap::new();
+
+    // 拡張機能の情報を収集
+    let extensions_info: Vec<ExtensionInfo> = self
+        .clients
+        .keys()
+        .map(|name| {
+            let instructions = self.instructions.get(name).cloned().unwrap_or_default();
+            let has_resources = self.resource_capable_extensions.contains(name);
+            ExtensionInfo::new(name, &instructions, has_resources)
+        })
+        .collect();
+    context.insert("extensions", serde_json::to_value(extensions_info).unwrap());
+
+    // システムプロンプトテンプレートに渡す
+    prompt_template::render_global_file("system.md", &context)
+        .expect("Prompt should render")
+}
+```
+
+↓でちゃんとレンダリングされるし、anthropicのAPIに渡される crates/goose/src/providers/formats/anthropic.rs の create_requestに書いてるけど、 { "system": "{{system}}", "tools": "{{tools}}" } } みたいな感じで、systemとtoolsがjsonで渡される。
+
+`system.md` テンプレートでは、これらの情報が以下のように組み込まれます:
+```markdown
+{% for extension in extensions %}
+## {{extension.name}}
+{% if extension.has_resources %}
+{{extension.name}} supports resources, you can use platform__read_resource,
+and platform__list_resources on this extension.
+{% endif %}
+{% if extension.instructions %}### Instructions
+{{extension.instructions}}{% endif %}
+{% endfor %}
+```
+
+この流れにより、拡張機能のインストラクション（使い方）と保存されたメモリの内容が、LLMに提供されるシステムプロンプトに組み込まれます。
+
 ## メモリの読み込みプロセス
 
 `MemoryRouter::new()`が呼び出されると、以下の処理が行われます：
@@ -192,8 +318,13 @@ pub fn clear_memory(&self, category: &str, is_global: bool) -> io::Result<()>
 
 「〇〇を思い出してください」のような命令に対するGooseの処理フローについて詳しく説明します。ここには重要な区別があります：
 
-1. **Extensionのインストラクション読み込み**：セッション開始時
-2. **メモリの内容の読み込み**：メモリツール初回使用時
+1. **Extensionのインストラクション読み込み**：
+   - メモリ拡張機能が有効化されている場合：セッション開始時
+   - メモリ拡張機能が有効化されていない場合：メモリツール初回使用時
+
+2. **メモリの内容の読み込み**：
+   - メモリ拡張機能が有効化されている場合：セッション開始時
+   - メモリ拡張機能が有効化されていない場合：メモリツール初回使用時
 
 ## インストラクション適用の内部実装
 
@@ -228,15 +359,22 @@ for extension in ExtensionManager::get_all().expect("should load extensions") {
 
 ### 2. インストラクションの保存
 
-`crates/goose/src/agents/capabilities.rs`の`add_extension`メソッドが当てられ、拡張機能のインストラクションを保持します：
+`crates/goose/src/agents/capabilities.rs`の`add_extension`メソッドが呼ばれ、拡張機能のインストラクションを保持します：
 
 ```rust
-// Store instructions if provided
+// 拡張機能から返されたインストラクションを保存
 if let Some(instructions) = init_result.instructions {
     self.instructions
         .insert(sanitized_name.clone(), instructions);
 }
 ```
+
+この処理は以下の流れで行われます:
+
+1. 拡張機能のクライアント (`McpClient`) を作成
+2. クライアントの `initialize` メソッドを呼び出し
+3. 初期化結果から `instructions` を取得（この中にメモリの内容も含まれる）
+4. インストラクションをハッシュマップに保存
 
 ### 3. システムプロンプトの生成
 
@@ -334,7 +472,7 @@ Keywords that trigger memory tools:
 
 1. **セッション開始時**：
    - memory extensionが有効化されている場合、そのインストラクション（使い方の説明）はシステムプロンプトの一部として既に読み込まれています
-   - しかし、保存されているメモリの内容はまだ読み込まれていません
+   - メモリ拡張機能が有効な場合、保存されているメモリの内容もインストラクションに含まれて読み込まれます
 
 2. **ユーザーが「〇〇を思い出してください」と入力**：
    - 言語モデル（GPT-4やClaude等）がシステムプロンプトに含まれるmemory extensionのインストラクションを参照
@@ -342,7 +480,7 @@ Keywords that trigger memory tools:
    - `memory__retrieve_memories`ツールを呼び出すべきと判断
 
 3. **初めてメモリツールを使用する場合**：
-   - memory extensionが初期化され、保存されているメモリファイルが読み込まれる
+   - もしまだメモリ拡張機能が初期化されていない場合、初期化され、保存されているメモリファイルが読み込まれる
    - 読み込まれたメモリ内容がシステムプロンプトに追加される
    - メモリに「このファイルが読み込まれたら〇〇と言ってください」のような指示があれば、その時点で実行される
 
@@ -358,7 +496,7 @@ Keywords that trigger memory tools:
 
 - **2つの異なる読み込み**：
   - **インストラクション**（どう動くべきかの説明）はセッション開始時に読み込まれる
-  - **メモリの内容**（保存されていた情報）は初めてメモリツールを使うときに読み込まれる
+  - **メモリの内容**（保存されていた情報）はメモリ拡張機能が初期化されるタイミングで読み込まれる
 
 - **インストラクションの優先度**：
   - memory extensionのインストラクションは、他のextensionのインストラクションと同様に、言語モデルの行動を導くガイドラインとして機能する

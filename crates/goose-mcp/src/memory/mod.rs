@@ -1,16 +1,6 @@
 use async_trait::async_trait;
 use etcetera::{choose_app_strategy, AppStrategy};
 use indoc::formatdoc;
-use serde_json::{json, Value};
-use std::{
-    collections::HashMap,
-    fs,
-    future::Future,
-    io::{self, Read, Write},
-    path::PathBuf,
-    pin::Pin,
-};
-use tracing::debug;
 use mcp_core::{
     handler::{PromptError, ResourceError, ToolError},
     prompt::Prompt,
@@ -21,6 +11,16 @@ use mcp_core::{
 };
 use mcp_server::router::CapabilitiesBuilder;
 use mcp_server::Router;
+use serde_json::{json, Value};
+use std::{
+    collections::HashMap,
+    fs,
+    future::Future,
+    io::{self, Read, Write},
+    path::PathBuf,
+    pin::Pin,
+};
+use tracing::debug;
 
 // MemoryRouter implementation
 #[derive(Clone)]

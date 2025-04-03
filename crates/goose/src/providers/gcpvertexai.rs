@@ -379,8 +379,6 @@ impl GcpVertexAIProvider {
                     )))
                 }
             };
-
-
         }
     }
 
@@ -505,6 +503,8 @@ impl Provider for GcpVertexAIProvider {
     ) -> Result<(Message, ProviderUsage), ProviderError> {
         // Create request and context
         let (request, context) = create_request(&self.model, system, messages, tools)?;
+
+        // println!("!!REQUEST!!: {}", serde_json::to_string_pretty(&request).unwrap());
 
         // Send request and process response
         let response = self.post(request.clone(), &context).await?;

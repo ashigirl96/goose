@@ -1,87 +1,339 @@
-//! セッション構築とエクステンション管理のサンプル
-//! このサンプルでは、以下の機能を説明します：
-//! - build_session関数の使用方法
-//! - add_extension関数によるエクステンションの追加
-//! - メモリーの統合過程
-//! 
-//! 実行方法: cargo run --package goose-cli --example session_builder
+use anyhow::Result;
+use clap::{Args, Parser, Subcommand};
 
-use goose::message::Message;
+use goose::config::Config;
+
+use goose_cli::commands::agent_version::AgentCommand;
+use goose_cli::commands::bench::{list_selectors, run_benchmark};
+use goose_cli::commands::configure::handle_configure;
+use goose_cli::commands::info::handle_info;
+use goose_cli::commands::mcp::run_server;
+use goose_cli::commands::session::handle_session_list;
+use goose_cli::logging::setup_logging;
+use goose_cli::session;
 use goose_cli::session::build_session;
+use std::io::Read;
+use std::path::PathBuf;
+
+#[derive(Parser)]
+#[command(author, version, display_name = "", about, long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Option<Command>,
+}
+
+#[derive(Args)]
+#[group(required = false, multiple = false)]
+struct Identifier {
+    #[arg(
+        short,
+        long,
+        value_name = "NAME",
+        help = "Name for the chat session (e.g., 'project-x')",
+        long_help = "Specify a name for your chat session. When used with --resume, will resume this specific session if it exists."
+    )]
+    name: Option<String>,
+
+    #[arg(
+        short,
+        long,
+        value_name = "PATH",
+        help = "Path for the chat session (e.g., './playground.jsonl')",
+        long_help = "Specify a path for your chat session. When used with --resume, will resume this specific session if it exists."
+    )]
+    path: Option<PathBuf>,
+}
+
+fn extract_identifier(identifier: Identifier) -> session::Identifier {
+    if let Some(name) = identifier.name {
+        session::Identifier::Name(name)
+    } else if let Some(path) = identifier.path {
+        session::Identifier::Path(path)
+    } else {
+        unreachable!()
+    }
+}
+
+#[derive(Subcommand)]
+enum SessionCommand {
+    #[command(about = "List all available sessions")]
+    List {
+        #[arg(short, long, help = "List all available sessions")]
+        verbose: bool,
+
+        #[arg(
+            short,
+            long,
+            help = "Output format (text, json)",
+            default_value = "text"
+        )]
+        format: String,
+    },
+}
+
+#[derive(Subcommand)]
+enum Command {
+    /// Configure Goose settings
+    #[command(about = "Configure Goose settings")]
+    Configure {},
+
+    /// Display Goose configuration information
+    #[command(about = "Display Goose information")]
+    Info {
+        /// Show verbose information including current configuration
+        #[arg(short, long, help = "Show verbose information including config.yaml")]
+        verbose: bool,
+    },
+
+    /// Manage system prompts and behaviors
+    #[command(about = "Run one of the mcp servers bundled with goose")]
+    Mcp { name: String },
+
+    /// Start or resume interactive chat sessions
+    #[command(
+        about = "Start or resume interactive chat sessions",
+        visible_alias = "s"
+    )]
+    Session {
+        #[command(subcommand)]
+        command: Option<SessionCommand>,
+        /// Identifier for the chat session
+        #[command(flatten)]
+        identifier: Option<Identifier>,
+
+        /// Resume a previous session
+        #[arg(
+            short,
+            long,
+            help = "Resume a previous session (last used or specified by --name)",
+            long_help = "Continue from a previous chat session. If --name or --path is provided, resumes that specific session. Otherwise resumes the last used session."
+        )]
+        resume: bool,
+
+        /// Enable debug output mode
+        #[arg(
+            long,
+            help = "Enable debug output mode with full content and no truncation",
+            long_help = "When enabled, shows complete tool responses without truncation and full paths."
+        )]
+        debug: bool,
+
+        /// Add stdio extensions with environment variables and commands
+        #[arg(
+            long = "with-extension",
+            value_name = "COMMAND",
+            help = "Add stdio extensions (can be specified multiple times)",
+            long_help = "Add stdio extensions from full commands with environment variables. Can be specified multiple times. Format: 'ENV1=val1 ENV2=val2 command args...'",
+            action = clap::ArgAction::Append
+        )]
+        extension: Vec<String>,
+
+        /// Add builtin extensions by name
+        #[arg(
+            long = "with-builtin",
+            value_name = "NAME",
+            help = "Add builtin extensions by name (e.g., 'developer' or multiple: 'developer,github')",
+            long_help = "Add one or more builtin extensions that are bundled with goose by specifying their names, comma-separated",
+            value_delimiter = ','
+        )]
+        builtin: Vec<String>,
+    },
+
+    /// Execute commands from an instruction file
+    #[command(about = "Execute commands from an instruction file or stdin")]
+    Run {
+        /// Path to instruction file containing commands
+        #[arg(
+            short,
+            long,
+            value_name = "FILE",
+            help = "Path to instruction file containing commands. Use - for stdin.",
+            conflicts_with = "input_text"
+        )]
+        instructions: Option<String>,
+
+        /// Input text containing commands
+        #[arg(
+            short = 't',
+            long = "text",
+            value_name = "TEXT",
+            help = "Input text to provide to Goose directly",
+            long_help = "Input text containing commands for Goose. Use this in lieu of the instructions argument.",
+            conflicts_with = "instructions"
+        )]
+        input_text: Option<String>,
+
+        /// Continue in interactive mode after processing input
+        #[arg(
+            short = 's',
+            long = "interactive",
+            help = "Continue in interactive mode after processing initial input"
+        )]
+        interactive: bool,
+
+        /// Identifier for this run session
+        #[command(flatten)]
+        identifier: Option<Identifier>,
+
+        /// Resume a previous run
+        #[arg(
+            short,
+            long,
+            action = clap::ArgAction::SetTrue,
+            help = "Resume from a previous run",
+            long_help = "Continue from a previous run, maintaining the execution state and context."
+        )]
+        resume: bool,
+
+        /// Enable debug output mode
+        #[arg(
+            long,
+            help = "Enable debug output mode with full content and no truncation",
+            long_help = "When enabled, shows complete tool responses without truncation and full paths."
+        )]
+        debug: bool,
+
+        /// Add stdio extensions with environment variables and commands
+        #[arg(
+            long = "with-extension",
+            value_name = "COMMAND",
+            help = "Add stdio extensions (can be specified multiple times)",
+            long_help = "Add stdio extensions from full commands with environment variables. Can be specified multiple times. Format: 'ENV1=val1 ENV2=val2 command args...'",
+            action = clap::ArgAction::Append
+        )]
+        extension: Vec<String>,
+
+        /// Add builtin extensions by name
+        #[arg(
+            long = "with-builtin",
+            value_name = "NAME",
+            help = "Add builtin extensions by name (e.g., 'developer' or multiple: 'developer,github')",
+            long_help = "Add one or more builtin extensions that are bundled with goose by specifying their names, comma-separated",
+            value_delimiter = ','
+        )]
+        builtin: Vec<String>,
+    },
+
+    /// List available agent versions
+    Agents(AgentCommand),
+
+    /// Update the Goose CLI version
+    #[command(about = "Update the goose CLI version")]
+    Update {
+        /// Update to canary version
+        #[arg(
+            short,
+            long,
+            help = "Update to canary version",
+            long_help = "Update to the latest canary version of the goose CLI, otherwise updates to the latest stable version."
+        )]
+        canary: bool,
+
+        /// Enforce to re-configure Goose during update
+        #[arg(short, long, help = "Enforce to re-configure goose during update")]
+        reconfigure: bool,
+    },
+
+    Bench {
+        #[arg(
+            short = 's',
+            long = "selectors",
+            value_name = "EVALUATIONS_SELECTOR",
+            help = "Run this list of bench-suites.",
+            long_help = "Specify a comma-separated list of evaluation-suite names to be run.",
+            value_delimiter = ','
+        )]
+        selectors: Vec<String>,
+
+        #[arg(
+            short = 'i',
+            long = "include-dir",
+            value_name = "DIR_NAME",
+            action = clap::ArgAction::Append,
+            long_help = "Make one or more dirs available to all bench suites. Specify either a single dir-name, a comma-separated list of dir-names, or use this multiple instances of this flag to specify multiple dirs.",
+            value_delimiter = ','
+        )]
+        include_dirs: Vec<PathBuf>,
+
+        #[arg(
+            long = "repeat",
+            value_name = "QUANTITY",
+            long_help = "Number of times to repeat the benchmark run.",
+            default_value = "1"
+        )]
+        repeat: usize,
+
+        #[arg(
+            long = "list",
+            value_name = "LIST",
+            help = "List all selectors and the number of evaluations they select."
+        )]
+        list: bool,
+
+        #[arg(
+            long = "output",
+            short = 'o',
+            value_name = "FILE",
+            help = "Save benchmark results to a file"
+        )]
+        output: Option<PathBuf>,
+
+        #[arg(
+            long = "format",
+            value_name = "FORMAT",
+            help = "Output format (text, json)",
+            default_value = "text"
+        )]
+        format: String,
+
+        #[arg(
+            long = "summary",
+            help = "Show only summary results",
+            action = clap::ArgAction::SetTrue
+        )]
+        summary: bool,
+    },
+}
+
+#[derive(clap::ValueEnum, Clone, Debug)]
+enum CliProviderVariant {
+    OpenAi,
+    Databricks,
+    Ollama,
+}
+
+pub async fn cli() -> Result<()> {
+    let cli = Cli::parse();
+
+    match cli.command {
+        Some(Command::Mcp { name }) => {
+            println!("Running mcp server: {}", name);
+            let _ = run_server(&name).await;
+        }
+        None => {
+            println!("No command provided. Use --help for usage information.");
+            if !Config::global().exists() {
+                let _ = handle_configure().await;
+                return Ok(());
+            } else {
+                // Run session command by default
+                let mut session = build_session(None, false, vec![], vec![], false).await;
+                setup_logging(
+                    session.session_file().file_stem().and_then(|s| s.to_str()),
+                    None,
+                )?;
+                let _ = session.interactive(None).await;
+                return Ok(());
+            }
+        }
+        _ => {
+            panic!("Unknown command");
+        }
+    }
+    Ok(())
+}
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("🦢 Gooseセッションビルダーの例");
-    
-    // 1. 設定の読み込み
-    println!("1. 設定に関する情報");
-    println!("   設定は~/.config/goose/config.yamlから読み込まれます");
-    println!("   プロバイダーとモデル情報は環境変数からも読み込み可能です");
-    
-    // 2. セッションファイルの準備
-    println!("2. セッションを構築中...");
-
-    // 3. セッションの構築
-    let mut session = build_session(
-        None,  // セッションID
-        false,             // 既存セッションの再開か否か
-        Vec::new(),        // 拡張機能リスト
-        Vec::new(),        // 組み込み拡張機能リスト
-        true,              // デバッグモード
-    ).await;
-    println!("   セッションの構築完了");
-    
-    // 4. 組み込みエクステンションの追加
-    println!("4. 組み込みエクステンションを追加中...");
-    if let Err(e) = session.add_builtin("developer".to_string()).await {
-        println!("   エクステンションの追加エラー: {}", e);
-    } else {
-        println!("   'developer'エクステンションを追加しました");
-    }
-    
-    // 5. 外部エクステンションの追加方法
-    println!("5. 外部エクステンションの追加方法（実行はしません）");
-    println!("   実行例: session.add_extension(\"path/to/extension\").await?;");
-    
-    // 6. メモリーの統合過程を説明
-    println!("6. メモリー統合の流れ");
-    println!("   a. build_session()関数内でエクステンションが読み込まれます");
-    println!("   b. ExtensionManager::get_all()でインストール済みの拡張機能が読み込まれます");
-    println!("   c. memory拡張機能もロードされ、.goose/memory/と~/.config/goose/memory/からメモリーを読み込みます");
-    println!("   d. Session::new()が呼ばれ、セッションとメッセージ履歴が初期化されます");
-    
-    // 7. メッセージ処理の例
-    println!("7. メッセージ処理の例");
-    let message = "Gooseのセッション管理について教えてください";
-    println!("   メッセージ: {}", message);
-    println!("   (メッセージ処理は複雑なためシミュレーションのみです)");
-    
-    // メッセージを追加するだけで、実際の処理は行わない
-    let user_message = Message::user().with_text(message);
-    
-    // 8. セッション保存の説明
-    println!("8. セッション保存の仕組み");
-    println!("   セッション終了時やセッション中断時に、メッセージ履歴が自動的に保存されます");
-    println!("   保存先: ~/.goose/sessions/またはセッションIDで指定されたパス");
-    println!("   次回起動時にresume=trueでセッションを再開できます");
-    
-    // 9. 「〇〇を思い出して」処理の流れ
-    println!("\n9. 「〇〇を思い出して」処理の流れ");
-    println!("    a. ユーザーが「〇〇を思い出して」と入力");
-    println!("    b. session.process_message()が呼ばれ、メッセージがLLMに渡される");
-    println!("    c. LLMが「思い出して」キーワードを認識し、memory__retrieve_memoriesツールを呼び出す");
-    println!("    d. メモリー拡張機能がカテゴリに基づいてメモリーを検索");
-    println!("    e. 結果がLLMに返され、ユーザー向けに整形された応答が生成される");
-    
-    // 10. 「〇〇を覚えておいて」処理の流れ
-    println!("\n10. 「〇〇を覚えておいて」処理の流れ");
-    println!("    a. ユーザーが「〇〇を覚えておいて」と入力");
-    println!("    b. session.process_message()が呼ばれ、メッセージがLLMに渡される");
-    println!("    c. LLMが「覚えておいて」キーワードを認識し、確認メッセージを生成");
-    println!("    d. 確認完、memory__remember_memoryツールを呼び出し、メモリーを保存");
-    println!("    e. カテゴリとスコープに基づいて適切なディレクトリに保存");
-    println!("    f. 保存確認がユーザーに表示される");
-    
-    println!("\n🦢 サンプル実行終了");
-    Ok(())
+async fn main() -> Result<()> {
+    cli().await
 }
