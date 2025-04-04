@@ -1,0 +1,15 @@
+[package]
+name = "goose-bot"
+version = "0.1.0"
+edition = "2021"
+authors = ["Goose Team"]
+description = "Goose Bot - A Chat Bot UI for Goose"
+
+[lib]
+path = "src-rust/lib.rs"
+
+[workspace]
+members = ["src-tauri"]
+
+[dependencies]
+# 必要なデータ型共有などのあるRust依存関係がある場合に記述
