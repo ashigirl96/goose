@@ -562,8 +562,7 @@ impl Session {
                         config.get_param("GOOSE_MODE").unwrap_or("auto".to_string());
                     if curr_goose_mode != "auto" {
                         config
-                            .set_param("GOOSE_MODE", Value::String("auto".to_string()))
-                            .unwrap();
+                            .set_param("GOOSE_MODE", Value::String("auto".to_string()))?;
                     }
 
                     // clear the messages before acting on the plan
