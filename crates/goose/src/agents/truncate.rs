@@ -608,6 +608,8 @@ impl Agent for TruncateAgent {
 
         let plan_prompt = capabilities.get_planning_prompt(tools_info).await;
 
+        println!("Plan prompt: {}", plan_prompt);
+
         Ok(plan_prompt)
     }
 
