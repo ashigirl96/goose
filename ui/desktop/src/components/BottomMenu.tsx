@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useModel } from './settings/models/ModelContext';
-import { useRecentModels } from './settings/models/RecentModels'; // Hook for recent models
 import { Sliders } from 'lucide-react';
 import { ModelRadioList } from './settings/models/ModelRadioList';
 import { Document, ChevronUp, ChevronDown } from './icons';
@@ -8,7 +7,6 @@ import type { View } from '../App';
 import { settingsV2Enabled } from '../flags';
 import { BottomMenuModeSelection } from './BottomMenuModeSelection';
 import ModelsBottomBar from './settings_v2/models/bottom_bar/ModelsBottomBar';
-import ToolCount from './ToolCount';
 
 export default function BottomMenu({
   hasMessages,
@@ -19,7 +17,6 @@ export default function BottomMenu({
 }) {
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const { currentModel } = useModel();
-  const { recentModels } = useRecentModels(); // Get recent models
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Add effect to handle clicks outside
@@ -81,8 +78,6 @@ export default function BottomMenu({
 
       {/* Right-side section with ToolCount and Model Selector together */}
       <div className="flex items-center mr-4 space-x-1">
-        {/* Tool count */}
-        <ToolCount />
         {/* Model Selector Dropdown */}
         {settingsV2Enabled ? (
           <ModelsBottomBar dropdownRef={dropdownRef} setView={setView} />
