@@ -122,6 +122,7 @@ pub async fn build_session(session_config: SessionBuilderConfig) -> Session {
     };
 
     for extension in extensions_to_run {
+        println!("Starting extension: {}", extension.name());
         if let Err(e) = agent.add_extension(extension.clone()).await {
             let err = match e {
                 ExtensionError::Transport(McpClientError::StdioProcessError(inner)) => inner,
