@@ -32,6 +32,7 @@ use mcp_core::{
     prompt::Prompt, protocol::GetPromptResult, tool::Tool, Content, ToolError, ToolResult,
 };
 
+use super::platform_tools;
 use super::tool_execution::{
     ExtensionInstallResult, ToolFuture, CHAT_MODE_TOOL_SKIPPED_RESPONSE, DECLINED_RESPONSE,
 };
@@ -95,7 +96,7 @@ impl Agent {
             .extension_manager
             .lock()
             .await
-            .get_prefixed_tools()
+            .get_prefixed_tools(None)
             .await?;
 
         // Add frontend tools directly - they don't need prefixing since they're already uniquely named
@@ -263,19 +264,33 @@ impl Agent {
             }
             _ => {
                 let mut extension_manager = self.extension_manager.lock().await;
-                let _ = extension_manager.add_extension(extension).await;
+                extension_manager.add_extension(extension).await?;
             }
         };
 
         Ok(())
     }
 
-    pub async fn list_tools(&self) -> Vec<Tool> {
+    pub async fn list_tools(&self, extension_name: Option<String>) -> Vec<Tool> {
         let extension_manager = self.extension_manager.lock().await;
-        extension_manager
-            .get_prefixed_tools()
+        let mut prefixed_tools = extension_manager
+            .get_prefixed_tools(extension_name.clone())
             .await
-            .unwrap_or_default()
+            .unwrap_or_default();
+
+        if extension_name.is_none() || extension_name.as_deref() == Some("platform") {
+            // Add platform tools
+            prefixed_tools.push(platform_tools::search_available_extensions_tool());
+            prefixed_tools.push(platform_tools::enable_extension_tool());
+
+            // Add resource tools if supported
+            if extension_manager.supports_resources() {
+                prefixed_tools.push(platform_tools::read_resource_tool());
+                prefixed_tools.push(platform_tools::list_resources_tool());
+            }
+        }
+
+        prefixed_tools
     }
 
     pub async fn remove_extension(&mut self, name: &str) {
@@ -567,7 +582,7 @@ impl Agent {
 
     pub async fn get_plan_prompt(&self) -> anyhow::Result<String> {
         let extension_manager = self.extension_manager.lock().await;
-        let tools = extension_manager.get_prefixed_tools().await?;
+        let tools = extension_manager.get_prefixed_tools(None).await?;
         let tools_info = tools
             .into_iter()
             .map(|tool| {
@@ -594,12 +609,19 @@ impl Agent {
     pub async fn create_recipe(&self, mut messages: Vec<Message>) -> Result<Recipe> {
         let extension_manager = self.extension_manager.lock().await;
         let extensions_info = extension_manager.get_extensions_info().await;
-        let system_prompt = self
-            .prompt_manager
-            .build_system_prompt(extensions_info, self.frontend_instructions.clone());
+
+        // Get model name from provider
+        let model_config = self.provider.get_model_config();
+        let model_name = &model_config.model_name;
+
+        let system_prompt = self.prompt_manager.build_system_prompt(
+            extensions_info,
+            self.frontend_instructions.clone(),
+            Some(model_name),
+        );
 
         let recipe_prompt = self.prompt_manager.get_recipe_prompt().await;
-        let tools = extension_manager.get_prefixed_tools().await?;
+        let tools = extension_manager.get_prefixed_tools(None).await?;
 
         messages.push(Message::user().with_text(recipe_prompt));
 
