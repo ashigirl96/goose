@@ -4,6 +4,7 @@ use axum::http::HeaderMap;
 use reqwest::{Client, StatusCode};
 use serde_json::Value;
 use std::time::Duration;
+use tokio::time::sleep;
 
 use super::base::{ConfigKey, Provider, ProviderMetadata, ProviderUsage};
 use super::errors::ProviderError;
@@ -24,6 +25,64 @@ pub const ANTHROPIC_KNOWN_MODELS: &[&str] = &[
 
 pub const ANTHROPIC_DOC_URL: &str = "https://docs.anthropic.com/en/docs/about-claude/models";
 
+/// Default timeout for API requests in seconds
+const DEFAULT_TIMEOUT_SECS: u64 = 600;
+/// Default initial interval for retry (in milliseconds)
+const DEFAULT_INITIAL_RETRY_INTERVAL_MS: u64 = 5000;
+/// Default maximum number of retries
+const DEFAULT_MAX_RETRIES: usize = 6;
+/// Default retry backoff multiplier
+const DEFAULT_BACKOFF_MULTIPLIER: f64 = 2.0;
+/// Default maximum interval for retry (in milliseconds)
+const DEFAULT_MAX_RETRY_INTERVAL_MS: u64 = 320_000;
+
+/// Retry configuration for handling rate limit errors
+#[derive(Debug, Clone)]
+struct RetryConfig {
+    /// Maximum number of retry attempts
+    max_retries: usize,
+    /// Initial interval between retries in milliseconds
+    initial_interval_ms: u64,
+    /// Multiplier for backoff (exponential)
+    backoff_multiplier: f64,
+    /// Maximum interval between retries in milliseconds
+    max_interval_ms: u64,
+}
+
+impl Default for RetryConfig {
+    fn default() -> Self {
+        Self {
+            max_retries: DEFAULT_MAX_RETRIES,
+            initial_interval_ms: DEFAULT_INITIAL_RETRY_INTERVAL_MS,
+            backoff_multiplier: DEFAULT_BACKOFF_MULTIPLIER,
+            max_interval_ms: DEFAULT_MAX_RETRY_INTERVAL_MS,
+        }
+    }
+}
+
+impl RetryConfig {
+    /// Calculate the delay for a specific retry attempt (with jitter)
+    fn delay_for_attempt(&self, attempt: usize) -> Duration {
+        if attempt == 0 {
+            return Duration::from_millis(0);
+        }
+
+        // Calculate exponential backoff
+        let exponent = (attempt - 1) as u32;
+        let base_delay_ms = (self.initial_interval_ms as f64
+            * self.backoff_multiplier.powi(exponent as i32)) as u64;
+
+        // Apply max limit
+        let capped_delay_ms = std::cmp::min(base_delay_ms, self.max_interval_ms);
+
+        // Add jitter (+/-20% randomness) to avoid thundering herd problem
+        let jitter_factor = 0.8 + (rand::random::<f64>() * 0.4); // Between 0.8 and 1.2
+        let jittered_delay_ms = (capped_delay_ms as f64 * jitter_factor) as u64;
+
+        Duration::from_millis(jittered_delay_ms)
+    }
+}
+
 #[derive(serde::Serialize)]
 pub struct AnthropicProvider {
     #[serde(skip)]
@@ -31,6 +90,8 @@ pub struct AnthropicProvider {
     host: String,
     api_key: String,
     model: ModelConfig,
+    #[serde(skip)]
+    retry_config: RetryConfig,
 }
 
 impl Default for AnthropicProvider {
@@ -49,15 +110,53 @@ impl AnthropicProvider {
             .unwrap_or_else(|_| "https://api.anthropic.com".to_string());
 
         let client = Client::builder()
-            .timeout(Duration::from_secs(600))
+            .timeout(Duration::from_secs(DEFAULT_TIMEOUT_SECS))
             .build()?;
+
+        // Load retry configuration from environment
+        let retry_config = Self::load_retry_config(&config);
 
         Ok(Self {
             client,
             host,
             api_key,
             model,
+            retry_config,
         })
+    }
+
+    /// Loads retry configuration from environment variables or uses defaults.
+    fn load_retry_config(config: &crate::config::Config) -> RetryConfig {
+        let max_retries = config
+            .get_param("ANTHROPIC_MAX_RETRIES")
+            .ok()
+            .and_then(|v: String| v.parse::<usize>().ok())
+            .unwrap_or(DEFAULT_MAX_RETRIES);
+
+        let initial_interval_ms = config
+            .get_param("ANTHROPIC_INITIAL_RETRY_INTERVAL_MS")
+            .ok()
+            .and_then(|v: String| v.parse::<u64>().ok())
+            .unwrap_or(DEFAULT_INITIAL_RETRY_INTERVAL_MS);
+
+        let backoff_multiplier = config
+            .get_param("ANTHROPIC_BACKOFF_MULTIPLIER")
+            .ok()
+            .and_then(|v: String| v.parse::<f64>().ok())
+            .unwrap_or(DEFAULT_BACKOFF_MULTIPLIER);
+
+        let max_interval_ms = config
+            .get_param("ANTHROPIC_MAX_RETRY_INTERVAL_MS")
+            .ok()
+            .and_then(|v: String| v.parse::<u64>().ok())
+            .unwrap_or(DEFAULT_MAX_RETRY_INTERVAL_MS);
+
+        RetryConfig {
+            max_retries,
+            initial_interval_ms,
+            backoff_multiplier,
+            max_interval_ms,
+        }
     }
 
     async fn post(&self, headers: HeaderMap, payload: Value) -> Result<Value, ProviderError> {
@@ -67,51 +166,96 @@ impl AnthropicProvider {
             ProviderError::RequestFailed(format!("Failed to construct endpoint URL: {e}"))
         })?;
 
-        let response = self
-            .client
-            .post(url)
-            .headers(headers)
-            .json(&payload)
-            .send()
-            .await?;
+        // Initialize retry counter
+        let mut attempts = 0;
+        let mut last_error = None;
 
-        let status = response.status();
-        let payload: Option<Value> = response.json().await.ok();
+        loop {
+            // Check if we've exceeded max retries
+            if attempts > 0 && attempts > self.retry_config.max_retries {
+                let error_msg = format!(
+                    "Exceeded maximum retry attempts ({}) for rate limiting (429)",
+                    self.retry_config.max_retries
+                );
+                tracing::error!("{}", error_msg);
+                return Err(last_error.unwrap_or(ProviderError::RateLimitExceeded(error_msg)));
+            }
 
-        // https://docs.anthropic.com/en/api/errors
-        match status {
-            StatusCode::OK => payload.ok_or_else( || ProviderError::RequestFailed("Response body is not valid JSON".to_string()) ),
-            StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
-                Err(ProviderError::Authentication(format!("Authentication failed. Please ensure your API keys are valid and have the required permissions. \
-                    Status: {}. Response: {:?}", status, payload)))
-            }
-            StatusCode::BAD_REQUEST => {
-                let mut error_msg = "Unknown error".to_string();
-                if let Some(payload) = &payload {
-                    if let Some(error) = payload.get("error") {
-                    tracing::debug!("Bad Request Error: {error:?}");
-                    error_msg = error.get("message").and_then(|m| m.as_str()).unwrap_or("Unknown error").to_string();
-                    if error_msg.to_lowercase().contains("too long") || error_msg.to_lowercase().contains("too many") {
-                        return Err(ProviderError::ContextLengthExceeded(error_msg.to_string()));
-                    }
-                }}
-                tracing::debug!(
-                    "{}", format!("Provider request failed with status: {}. Payload: {:?}", status, payload)
+            // Make the request
+            let response = self
+                .client
+                .post(url.clone())
+                .headers(headers.clone())
+                .json(&payload)
+                .send()
+                .await
+                .map_err(|e| ProviderError::RequestFailed(e.to_string()))?;
+
+            let status = response.status();
+            let response_payload: Option<Value> = response.json().await.ok();
+
+            // Handle 429 Too Many Requests or 503 Service Unavailable
+            if status == StatusCode::TOO_MANY_REQUESTS || status == StatusCode::SERVICE_UNAVAILABLE {
+                // Handle rate limit or server error with retry logic
+                attempts += 1;
+
+                // Try to parse response for more detailed error info
+                let error_message = if status == StatusCode::TOO_MANY_REQUESTS {
+                    format!("Rate limit exceeded (429). Retrying request.")
+                } else {
+                    format!("Server error (503). Retrying request.")
+                };
+
+                tracing::warn!(
+                    "Rate limit or server error (status {}) (attempt {}/{}): {}. Retrying after backoff...",
+                    status,
+                    attempts,
+                    self.retry_config.max_retries,
+                    error_message
                 );
-                Err(ProviderError::RequestFailed(format!("Request failed with status: {}. Message: {}", status, error_msg)))
+
+                // Store the error in case we need to return it after max retries
+                last_error = Some(ProviderError::RateLimitExceeded(error_message));
+
+                // Calculate and apply the backoff delay
+                let delay = self.retry_config.delay_for_attempt(attempts);
+                tracing::info!("Backing off for {:?} before retry", delay);
+                sleep(delay).await;
+                continue;
             }
-            StatusCode::TOO_MANY_REQUESTS => {
-                Err(ProviderError::RateLimitExceeded(format!("{:?}", payload)))
-            }
-            StatusCode::INTERNAL_SERVER_ERROR | StatusCode::SERVICE_UNAVAILABLE => {
-                Err(ProviderError::ServerError(format!("{:?}", payload)))
-            }
-            _ => {
-                tracing::debug!(
-                    "{}", format!("Provider request failed with status: {}. Payload: {:?}", status, payload)
-                );
-                Err(ProviderError::RequestFailed(format!("Request failed with status: {}", status)))
-            }
+
+            // https://docs.anthropic.com/en/api/errors
+            return match status {
+                StatusCode::OK => response_payload.ok_or_else( || ProviderError::RequestFailed("Response body is not valid JSON".to_string()) ),
+                StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
+                    Err(ProviderError::Authentication(format!("Authentication failed. Please ensure your API keys are valid and have the required permissions. \
+                        Status: {}. Response: {:?}", status, response_payload)))
+                }
+                StatusCode::BAD_REQUEST => {
+                    let mut error_msg = "Unknown error".to_string();
+                    if let Some(payload) = &response_payload {
+                        if let Some(error) = payload.get("error") {
+                        tracing::debug!("Bad Request Error: {error:?}");
+                        error_msg = error.get("message").and_then(|m| m.as_str()).unwrap_or("Unknown error").to_string();
+                        if error_msg.to_lowercase().contains("too long") || error_msg.to_lowercase().contains("too many") {
+                            return Err(ProviderError::ContextLengthExceeded(error_msg.to_string()));
+                        }
+                    }}
+                    tracing::debug!(
+                        "{}", format!("Provider request failed with status: {}. Payload: {:?}", status, response_payload)
+                    );
+                    Err(ProviderError::RequestFailed(format!("Request failed with status: {}. Message: {}", status, error_msg)))
+                }
+                StatusCode::INTERNAL_SERVER_ERROR => {
+                    Err(ProviderError::ServerError(format!("{:?}", response_payload)))
+                }
+                _ => {
+                    tracing::debug!(
+                        "{}", format!("Provider request failed with status: {}. Payload: {:?}", status, response_payload)
+                    );
+                    Err(ProviderError::RequestFailed(format!("Request failed with status: {}", status)))
+                }
+            };
         }
     }
 }
@@ -133,6 +277,30 @@ impl Provider for AnthropicProvider {
                     true,
                     false,
                     Some("https://api.anthropic.com"),
+                ),
+                ConfigKey::new(
+                    "ANTHROPIC_MAX_RETRIES",
+                    false,
+                    false,
+                    Some(&DEFAULT_MAX_RETRIES.to_string()),
+                ),
+                ConfigKey::new(
+                    "ANTHROPIC_INITIAL_RETRY_INTERVAL_MS",
+                    false,
+                    false,
+                    Some(&DEFAULT_INITIAL_RETRY_INTERVAL_MS.to_string()),
+                ),
+                ConfigKey::new(
+                    "ANTHROPIC_BACKOFF_MULTIPLIER",
+                    false,
+                    false,
+                    Some(&DEFAULT_BACKOFF_MULTIPLIER.to_string()),
+                ),
+                ConfigKey::new(
+                    "ANTHROPIC_MAX_RETRY_INTERVAL_MS",
+                    false,
+                    false,
+                    Some(&DEFAULT_MAX_RETRY_INTERVAL_MS.to_string()),
                 ),
             ],
         )
