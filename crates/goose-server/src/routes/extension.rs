@@ -1,14 +1,10 @@
-use std::collections::HashMap;
 use std::env;
 use std::path::Path;
 use std::sync::OnceLock;
 
 use crate::state::AppState;
 use axum::{extract::State, routing::post, Json, Router};
-use goose::{
-    agents::{extension::Envs, ExtensionConfig},
-    config::Config,
-};
+use goose::agents::{extension::Envs, ExtensionConfig};
 use http::{HeaderMap, StatusCode};
 use serde::{Deserialize, Serialize};
 use tracing;
@@ -24,6 +20,9 @@ enum ExtensionConfigRequest {
         name: String,
         /// The URI endpoint for the SSE extension.
         uri: String,
+        #[serde(default)]
+        /// Map of environment variable key to values.
+        envs: Envs,
         /// List of environment variable keys. The server will fetch their values from the keyring.
         #[serde(default)]
         env_keys: Vec<String>,
@@ -39,6 +38,9 @@ enum ExtensionConfigRequest {
         /// Arguments for the command.
         #[serde(default)]
         args: Vec<String>,
+        #[serde(default)]
+        /// Map of environment variable key to values.
+        envs: Envs,
         /// List of environment variable keys. The server will fetch their values from the keyring.
         #[serde(default)]
         env_keys: Vec<String>,
@@ -162,98 +164,50 @@ async fn add_extension(
         }
     }
 
-    // Load the configuration
-    let config = Config::global();
-
-    // Initialize a vector to collect any missing keys.
-    let mut missing_keys = Vec::new();
-
     // Construct ExtensionConfig with Envs populated from keyring based on provided env_keys.
     let extension_config: ExtensionConfig = match request {
         ExtensionConfigRequest::Sse {
             name,
             uri,
+            envs,
             env_keys,
             timeout,
-        } => {
-            let mut env_map = HashMap::new();
-            for key in env_keys {
-                match config.get_secret(&key) {
-                    Ok(value) => {
-                        env_map.insert(key, value);
-                    }
-                    Err(_) => {
-                        missing_keys.push(key);
-                    }
-                }
-            }
-
-            if !missing_keys.is_empty() {
-                return Ok(Json(ExtensionResponse {
-                    error: true,
-                    message: Some(format!(
-                        "Missing secrets for keys: {}",
-                        missing_keys.join(", ")
-                    )),
-                }));
-            }
-
-            ExtensionConfig::Sse {
-                name,
-                uri,
-                envs: Envs::new(env_map),
-                description: None,
-                timeout,
-                bundled: None,
-            }
-        }
+        } => ExtensionConfig::Sse {
+            name,
+            uri,
+            envs,
+            env_keys,
+            description: None,
+            timeout,
+            bundled: None,
+        },
         ExtensionConfigRequest::Stdio {
             name,
             cmd,
             args,
+            envs,
             env_keys,
             timeout,
         } => {
-            // Check allowlist for Stdio extensions
-            if !is_command_allowed(&cmd, &args) {
-                return Ok(Json(ExtensionResponse {
-                    error: true,
-                    message: Some(format!(
-                        "Extension '{}' is not in the allowed extensions list. Command: '{} {}'. If you require access please ask your administrator to update the allowlist.",                        
-                        args.join(" "),
-                        cmd, args.join(" ")
-                    )),
-                }));
-            }
-
-            let mut env_map = HashMap::new();
-            for key in env_keys {
-                match config.get_secret(&key) {
-                    Ok(value) => {
-                        env_map.insert(key, value);
-                    }
-                    Err(_) => {
-                        missing_keys.push(key);
-                    }
-                }
-            }
-
-            if !missing_keys.is_empty() {
-                return Ok(Json(ExtensionResponse {
-                    error: true,
-                    message: Some(format!(
-                        "Missing secrets for keys: {}",
-                        missing_keys.join(", ")
-                    )),
-                }));
-            }
+            // TODO: We can uncomment once bugs are fixed. Check allowlist for Stdio extensions
+            // if !is_command_allowed(&cmd, &args) {
+            //     return Ok(Json(ExtensionResponse {
+            //         error: true,
+            //         message: Some(format!(
+            //             "Extension '{}' is not in the allowed extensions list. Command: '{} {}'. If you require access please ask your administrator to update the allowlist.",
+            //             args.join(" "),
+            //             cmd, args.join(" ")
+            //         )),
+            //     }));
+            // }
 
             ExtensionConfig::Stdio {
                 name,
                 cmd,
                 args,
                 description: None,
-                envs: Envs::new(env_map),
+                envs,
+                env_keys,
                 timeout,
                 bundled: None,
             }
@@ -342,6 +296,7 @@ pub fn routes(state: AppState) -> Router {
 /// Structure representing the allowed extensions from the YAML file
 #[derive(Deserialize, Debug, Clone)]
 struct AllowedExtensions {
+    #[allow(dead_code)]
     extensions: Vec<ExtensionAllowlistEntry>,
 }
 
@@ -350,13 +305,16 @@ struct AllowedExtensions {
 struct ExtensionAllowlistEntry {
     #[allow(dead_code)]
     id: String,
+    #[allow(dead_code)]
     command: String,
 }
 
 // Global cache for the allowed extensions
+#[allow(dead_code)]
 static ALLOWED_EXTENSIONS: OnceLock<Option<AllowedExtensions>> = OnceLock::new();
 
 /// Fetches and parses the allowed extensions from the URL specified in GOOSE_ALLOWLIST env var
+#[allow(dead_code)]
 fn fetch_allowed_extensions() -> Option<AllowedExtensions> {
     match env::var("GOOSE_ALLOWLIST") {
         Err(_) => {
@@ -390,11 +348,13 @@ fn fetch_allowed_extensions() -> Option<AllowedExtensions> {
 }
 
 /// Gets the cached allowed extensions or fetches them if not yet cached
+#[allow(dead_code)]
 fn get_allowed_extensions() -> &'static Option<AllowedExtensions> {
     ALLOWED_EXTENSIONS.get_or_init(fetch_allowed_extensions)
 }
 
 /// Checks if a command is allowed based on the allowlist
+#[allow(dead_code)]
 fn is_command_allowed(cmd: &str, args: &[String]) -> bool {
     // Check if bypass is enabled
     if let Ok(bypass_value) = env::var("GOOSE_ALLOWLIST_BYPASS") {
