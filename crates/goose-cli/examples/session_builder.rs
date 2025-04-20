@@ -3,16 +3,11 @@ use clap::{Args, Parser, Subcommand};
 
 use goose::config::Config;
 
-use goose_cli::commands::agent_version::AgentCommand;
-use goose_cli::commands::bench::{list_selectors, run_benchmark};
 use goose_cli::commands::configure::handle_configure;
-use goose_cli::commands::info::handle_info;
 use goose_cli::commands::mcp::run_server;
-use goose_cli::commands::session::handle_session_list;
 use goose_cli::logging::setup_logging;
 use goose_cli::session;
-use goose_cli::session::build_session;
-use std::io::Read;
+use goose_cli::session::{build_session, SessionBuilderConfig};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -150,7 +145,16 @@ pub async fn cli() -> Result<()> {
                 return Ok(());
             } else {
                 // Run session command by default
-                let mut session = build_session(None, false, vec![], vec![], false).await;
+                let mut session = build_session(SessionBuilderConfig {
+                    identifier: None,
+                    resume: false,
+                    extensions: vec![],
+                    remote_extensions: vec![],
+                    builtins: vec![],
+                    extensions_override: None,
+                    additional_system_prompt: None,
+                    debug: false,
+                }).await;
                 setup_logging(
                     session.session_file().file_stem().and_then(|s| s.to_str()),
                     None,

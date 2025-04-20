@@ -419,6 +419,19 @@ impl Session {
                     continue;
                 }
                 input::InputResult::Retry => continue,
+                input::InputResult::Clear => {
+                    save_history(&mut editor);
+                    
+                    // Clear message history
+                    self.messages.clear();
+                    
+                    // Persist empty message list to file
+                    let provider = self.agent.provider();
+                    session::persist_messages(&self.session_file, &self.messages, Some(provider)).await?;
+                    
+                    output::render_success("Message history cleared.");
+                    continue;
+                }
                 input::InputResult::ListPrompts(extension) => {
                     save_history(&mut editor);
 

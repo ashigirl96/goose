@@ -221,6 +221,10 @@ pub fn render_error(message: &str) {
     println!("\n  {} {}\n", style("error:").red().bold(), message);
 }
 
+pub fn render_success(message: &str) {
+    println!("\n  {} {}\n", style("success:").green().bold(), message);
+}
+
 pub fn render_prompts(prompts: &HashMap<String, Vec<String>>) {
     println!();
     for (extension, prompts) in prompts {

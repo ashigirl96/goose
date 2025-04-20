@@ -18,6 +18,7 @@ pub enum InputResult {
     Plan(PlanCommandOptions),
     EndPlan,
     Recipe(Option<String>),
+    Clear,
 }
 
 #[derive(Debug)]
@@ -99,6 +100,7 @@ fn handle_slash_command(input: &str) -> Option<InputResult> {
             Some(InputResult::Retry)
         }
         "/t" => Some(InputResult::ToggleTheme),
+        "/clear" => Some(InputResult::Clear),
         "/prompts" => Some(InputResult::ListPrompts(None)),
         s if s.starts_with(CMD_PROMPTS) => {
             // Parse arguments for /prompts command
@@ -228,6 +230,7 @@ fn print_help() {
         "Available commands:
 /exit or /quit - Exit the session
 /t - Toggle Light/Dark/Ansi theme
+/clear - Clear all message history in the current session
 /extension <command> - Add a stdio extension (format: ENV1=val1 command args...)
 /builtin <names> - Add builtin extensions by name (comma-separated)
 /prompts [--extension <name>] - List all available prompts, optionally filtered by extension
@@ -274,6 +277,12 @@ mod tests {
         assert!(matches!(
             handle_slash_command("/?"),
             Some(InputResult::Retry)
+        ));
+
+        // Test clear command
+        assert!(matches!(
+            handle_slash_command("/clear"),
+            Some(InputResult::Clear)
         ));
 
         // Test theme toggle
@@ -363,6 +372,12 @@ mod tests {
         } else {
             panic!("Expected AddBuiltin");
         }
+        
+        // Leading/trailing whitespace in clear command
+        assert!(matches!(
+            handle_slash_command("  /clear  "),
+            Some(InputResult::Clear)
+        ));
     }
 
     // Test prompt with no arguments
