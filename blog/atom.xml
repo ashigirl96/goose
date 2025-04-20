@@ -2,11 +2,231 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://block.github.io/goose/blog</id>
     <title>codename goose Blog</title>
-    <updated>2025-04-08T00:00:00.000Z</updated>
+    <updated>2025-04-17T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://block.github.io/goose/blog"/>
     <subtitle>codename goose Blog</subtitle>
     <icon>https://block.github.io/goose/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[Codename Goose Goes to New York]]></title>
+        <id>https://block.github.io/goose/blog/2025/04/17/goose-goes-to-NY</id>
+        <link href="https://block.github.io/goose/blog/2025/04/17/goose-goes-to-NY"/>
+        <updated>2025-04-17T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Goose lands in NYC for its second community meetup]]></summary>
+        <content type="html"><![CDATA[<p><img decoding="async" loading="lazy" alt="blog cover" src="https://block.github.io/goose/assets/images/cover-6c131d275bcdb4d8651a140d62e2975f.png" width="2240" height="1260" class="img_ev3q"></p>
+<p>We brought Goose to New York City and it was one for the books.</p>
+<p>Over 100 people registered, plus 87 on the waitlist, and we had a packed room full of folks who were curious, thoughtful, and ready to dive in. Some were developers already exploring Goose and MCP, others were totally new to the world of AI agents. That’s the beauty of Goose, it’s for developers <em>and</em> non-developers.</p>
+<p>The energy was there from the moment the event began - music, pizza, and authentic networking. We had lightning talks, a Goose-themed game, hands-on hacking, and yeah… a few Ebbs IPAs might’ve ended up in people’s backpacks by the end of the night.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="why-we-brought-goose-to-nyc">Why We Brought Goose to NYC<a href="https://block.github.io/goose/blog/2025/04/17/goose-goes-to-NY#why-we-brought-goose-to-nyc" class="hash-link" aria-label="Direct link to Why We Brought Goose to NYC" title="Direct link to Why We Brought Goose to NYC">​</a></h2>
+<p>After the Boston meetup, we wanted to keep the momentum going and test things in a new city. New York felt like the perfect place. It’s a melting pot of people and has a really strong tech scene. Our goals were simple:</p>
+<p>✅ Keep building the Goose community<br>
+<!-- -->✅ Get real feedback and ideas from the community in person<br>
+<!-- -->✅ Have some fun while learning together</p>
+<p>NYC didn’t disappoint.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="in-case-you-missed-it">In Case You Missed It<a href="https://block.github.io/goose/blog/2025/04/17/goose-goes-to-NY#in-case-you-missed-it" class="hash-link" aria-label="Direct link to In Case You Missed It" title="Direct link to In Case You Missed It">​</a></h2>
+<div class="carousel-container"><div class="swiper swiper-container-test-carousel" style="width:100%"><div class="swiper-wrapper"><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/focus4-8232c187021a690519cfa1e8f1c18014.jpg" alt="Slide 1" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/focus-4927104eb487e6b1f9480d8149e26c36.jpg" alt="Slide 2" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/focus2-4ca4bc40c7a86ec46ec566d4d1fd2001.jpg" alt="Slide 3" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/focus3-8ba8fb623d148fa5583c41c0a7a721a4.jpg" alt="Slide 4" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/focus5-afe81c949e09dc788989d1c20c3a74fe.jpg" alt="Slide 5" class="carousel-image"></div></div><div class="swiper-button-prev"></div><div class="swiper-button-next"></div><div class="swiper-pagination"></div></div></div>
+<p>We kicked things off with food and free time to meet people, chat, and ask questions before jumping into the talks:</p>
+<ul>
+<li><strong><a href="https://www.linkedin.com/in/erinmikail/" target="_blank" rel="noopener noreferrer">Erin Mikail</a></strong> from Galileo ran a Goose-themed game that got people laughing <em>and</em> learning about the importance of agent evaluation.</li>
+<li><strong><a href="https://www.linkedin.com/in/ebonylouis/" target="_blank" rel="noopener noreferrer">I, Ebony Louis</a></strong> gave a walkthrough of Goose and MCP, showing how quick it is to get started with any MCP server.</li>
+<li><strong><a href="https://www.linkedin.com/in/alexjhancock/" target="_blank" rel="noopener noreferrer">Alex Hancock</a></strong> went deep on MCP, and how it powers secure, extendable agent workflows.</li>
+</ul>
+<p>Then came the best part — hack time. <strong>27 people got Goose up and running live</strong> during the event, which was amazing to see. It’s always fun watching that moment when it clicks for someone, ideas start flowing, people get inspired, and they walk away ready to actually <em>use</em> Goose.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="what-people-said">What People Said<a href="https://block.github.io/goose/blog/2025/04/17/goose-goes-to-NY#what-people-said" class="hash-link" aria-label="Direct link to What People Said" title="Direct link to What People Said">​</a></h2>
+<div class="carousel-container"><div class="swiper swiper-container-test-carousel" style="width:100%"><div class="swiper-wrapper"><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/swag2-6ed2a0029c159d14013e366f6f945268.jpg" alt="Slide 1" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/swag1-7e7ee0095446a64f5dbcffe6b5b69460.jpg" alt="Slide 2" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/swag-8eaec6e42aea06511f6334c6e9e21ec1.jpg" alt="Slide 3" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/swag3-50d943bd7ee6e68c65ad0bed5e339f9a.jpg" alt="Slide 4" class="carousel-image"></div></div><div class="swiper-button-prev"></div><div class="swiper-button-next"></div><div class="swiper-pagination"></div></div></div>
+<blockquote>
+<p>“It took me less than 5 mins to get myself set up with a sample project and running the Goose CLI in GitHub Codespaces! Overall it felt great to be back in a physical venue for a hands-on event with an engaged community and a timely topic for discussion.”<br>
+<!-- -->— <em><a href="https://www.linkedin.com/in/nityan/" target="_blank" rel="noopener noreferrer">Nitya Narasimhan, Senior Cloud Advocate @ Microsoft</a></em></p>
+</blockquote>
+<blockquote>
+<p>“The live demos, open discussions, and practical exercises made it an exceptional learning experience. Feeling energized and inspired to explore how Goose and MCP can be leveraged in future data engineering projects!”<br>
+<!-- -->— <em><a href="https://www.linkedin.com/in/manireddy12/" target="_blank" rel="noopener noreferrer">Manikumarreddy Gajjela, Full Stack Developer @ Tetra Computing</a></em></p>
+</blockquote>
+<blockquote>
+<p>“Everyone seems bullish on Model Context Protocol (MCP) these days… Goose is an open-source, on-machine AI agent built to automate your tasks. The coolest part? You can even plug in your own hosted Ollama LLM with Goose!”<br>
+<!-- -->— <em><a href="https://www.linkedin.com/in/rijuldahiya/" target="_blank" rel="noopener noreferrer">Rijul Dahiya, Graduate Teaching Assistant @ NYU</a></em></p>
+</blockquote>
+<blockquote>
+<p>“Great event – great mix of introductory and technical material as well as fun, and I liked that it provided a bunch of time at the beginning and end that was unstructured.”<br>
+<!-- -->— <em><a href="https://www.linkedin.com/in/matthewhillnewyork/" target="_blank" rel="noopener noreferrer">Matthew Hill, Sr Director of AI Engineering @ Dataminr</a></em></p>
+</blockquote>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="moments-we-loved-️">Moments We Loved ❤️<a href="https://block.github.io/goose/blog/2025/04/17/goose-goes-to-NY#moments-we-loved-%EF%B8%8F" class="hash-link" aria-label="Direct link to Moments We Loved ❤️" title="Direct link to Moments We Loved ❤️">​</a></h2>
+<ul>
+<li>🍕 Pizza, music, and people catching up before things even kicked off</li>
+<li>🎮 The Goose game- yes, it got competitive and oddly dark lol</li>
+<li>🧳 Folks traveled from Philly and DC just to attend</li>
+<li>📸 Having a photographer to capture candid and fun moments</li>
+<li>🧠 A bunch of thoughtful “I’m not a dev but…” questions that we <em>loved</em> hearing</li>
+</ul>
+<div class="carousel-container"><div class="swiper swiper-container-test-carousel" style="width:100%"><div class="swiper-wrapper"><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/speaker1-45d20237329fb76d724e73b6ee1f7a89.jpg" alt="Slide 1" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/speaker-bd71c5b83c6e0cd202ea8aa8af867b58.jpg" alt="Slide 2" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/fun-340fa01a11fd04982ae7e2e612bded03.jpg" alt="Slide 3" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/fun1-b0d7060f8629eec662b2c9f5a22dd7d0.jpg" alt="Slide 4" class="carousel-image"></div><div class="swiper-slide"><img src="https://block.github.io/goose/assets/images/focus2-4ca4bc40c7a86ec46ec566d4d1fd2001.jpg" alt="Slide 5" class="carousel-image"></div></div><div class="swiper-button-prev"></div><div class="swiper-button-next"></div><div class="swiper-pagination"></div></div></div>
+<p>At the end, people were asking when the next one is and yes, we may have let it slip early…</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="up-next-goose-flies-south-">Up Next: Goose Flies South 🛫<a href="https://block.github.io/goose/blog/2025/04/17/goose-goes-to-NY#up-next-goose-flies-south-" class="hash-link" aria-label="Direct link to Up Next: Goose Flies South 🛫" title="Direct link to Up Next: Goose Flies South 🛫">​</a></h2>
+<p>Our next Goose Meetup is already locked in!</p>
+<p>👉 <strong>Atlanta – Wednesday, April 30</strong><br>
+<!-- -->🕕 <strong>6:00 PM – 8:30 PM ET</strong><br>
+<!-- -->📍 <a href="https://lu.ma/x9ccqruq" target="_blank" rel="noopener noreferrer">RSVP here</a></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="big-thanks-">Big Thanks 🙌<a href="https://block.github.io/goose/blog/2025/04/17/goose-goes-to-NY#big-thanks-" class="hash-link" aria-label="Direct link to Big Thanks 🙌" title="Direct link to Big Thanks 🙌">​</a></h2>
+<p>Huge shoutout to <strong><a href="https://www.linkedin.com/in/taniachakraborty/" target="_blank" rel="noopener noreferrer">Tania Chakraborty</a></strong> and <strong><a href="https://www.linkedin.com/in/anthonygiuliano1/" target="_blank" rel="noopener noreferrer">Anthony Giuliano</a></strong> for being there, and to everyone who came through, asked questions, helped out, and made it a night to remember.</p>
+<p>The community truly made this one special, people stayed after to chat, helped clean up without being asked, and brought such a good energy into the room. We couldn’t have asked for a better crowd.</p>
+<p>We’ll see you in Atlanta 👀</p>
+]]></content>
+        <author>
+            <name>Ebony Louis</name>
+        </author>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[How ATrueLight4 Helped Goose Navigate Windows]]></title>
+        <id>https://block.github.io/goose/blog/2025/04/14/community-atruelight4</id>
+        <link href="https://block.github.io/goose/blog/2025/04/14/community-atruelight4"/>
+        <updated>2025-04-14T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Block Open Source Top Contributor of the Month]]></summary>
+        <content type="html"><![CDATA[<p><img decoding="async" loading="lazy" alt="blog cover" src="https://block.github.io/goose/assets/images/goose4win-7f57433fa3f19849e74b18ebffe08bcf.png" width="1206" height="633" class="img_ev3q"></p>
+<p>As the goose team continues to work on new features over 800 community members voted to express their need for Goose on Windows. Today's top contributor stepped in to aid this ongoing effort.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="windows-support">Windows Support<a href="https://block.github.io/goose/blog/2025/04/14/community-atruelight4#windows-support" class="hash-link" aria-label="Direct link to Windows Support" title="Direct link to Windows Support">​</a></h2>
+<p>Since the launch of codename goose, the open source community has been wanting and requesting the same automation by goose on Windows.</p>
+<p>Currently, goose's CLI version works on Windows with limited built-in extensions via WSL, or Windows Subsystem for Linux. While there is a limited internal beta in the works, there are several bugs and improvements that are being worked on to ensure codename goose has the same seamless experience as it does on Mac.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="atruelight4s-goose4win">ATrueLight4's Goose4Win<a href="https://block.github.io/goose/blog/2025/04/14/community-atruelight4#atruelight4s-goose4win" class="hash-link" aria-label="Direct link to ATrueLight4's Goose4Win" title="Direct link to ATrueLight4's Goose4Win">​</a></h2>
+<p>Our featured contributor, <a href="https://github.com/ATrueLight4" target="_blank" rel="noopener noreferrer">ATrueLight4</a>, shipped <strong>Goose4Win</strong>, a fix that improves how Goose handles Windows-specific file paths. Their contribution is already merged into main, so if you install Goose for CLI on Windows today, you’ll get the improvement out of the box. No extra setup needed.</p>
+<p>Thank you so much for your contribution, ATrueLight4! Your work brings us one step closer to Goose on Windows.</p>
+<p>To show our deep gratitude for your contribution, we've granted you the exclusive ✨Top Contributor✨ badge on the Block Open Source Discord! You'll also be one of the first contributors to receive exclusive codename goose swag. (more info on that to be announced later 👀🪿)</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="get-your-own-spotlight">Get Your Own Spotlight<a href="https://block.github.io/goose/blog/2025/04/14/community-atruelight4#get-your-own-spotlight" class="hash-link" aria-label="Direct link to Get Your Own Spotlight" title="Direct link to Get Your Own Spotlight">​</a></h2>
+<p>Interested in contributing to goose and having your contribution featured? Whether it's improving platform support, adding new features, or fixing bugs, we welcome all contributions from the open source community. You can <a href="https://discord.gg/block-opensource" target="_blank" rel="noopener noreferrer">join the Block Open Source Discord</a> or <a href="https://block.github.io/goose/" target="_blank" rel="noopener noreferrer">get started using codename goose</a> today.</p>
+]]></content>
+        <author>
+            <name>Tania Chakraborty</name>
+        </author>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Finetuning Toolshim Models for Tool Calling]]></title>
+        <id>https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim</id>
+        <link href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim"/>
+        <updated>2025-04-11T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Addressing performance limitations in models without native tool calling support]]></summary>
+        <content type="html"><![CDATA[<p><img decoding="async" loading="lazy" alt="blog cover" src="https://block.github.io/goose/assets/images/toolshim-header-42611f614e7722f90cf83991debe3046.png" width="1200" height="630" class="img_ev3q"></p>
+<p>Our recently published <a href="https://block.github.io/goose/blog/2025/03/31/goose-benchmark" target="_blank" rel="noopener noreferrer">Goose benchmark</a> revealed significant performance limitations in models where tool calling is not straightforwardly supported (e.g., Gemma3, Deepseek-r1, phi4). These models often fail to invoke tools at appropriate times or produce malformed or inconsistently formatted tool calls. With the most recent releases of Llama4 and Deepseek v3 (0324), we are again observing challenges with effective tool calling performance, even on these flagship openweight models.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="why-tool-calling-is-important">Why tool calling is important<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#why-tool-calling-is-important" class="hash-link" aria-label="Direct link to Why tool calling is important" title="Direct link to Why tool calling is important">​</a></h2>
+<p>Tool calling is a critical capability for agents like goose. It allows models to go beyond text and image generation and take concrete actions, such as executing code, querying databases, searching the web, or interacting with design tools like Figma. Equipping agents with a broad set of tools empowers them to discover and interface with external systems, much like a human would. While this might be overkill for narrow, more deterministic applications of LLMs, it is essential for general-purpose agents like goose. Without reliable tool calling, we limit what models can do to help us automate, remove toil and navigate complex systems. Pure generation–of text, images, speech, and video–is just the first step on the path to more powerful agentic capabilities. There is so much more that models can do if we give them the legs to run.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="background-using-a-local-model-as-a-toolshim">Background: using a local model as a "toolshim"<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#background-using-a-local-model-as-a-toolshim" class="hash-link" aria-label="Direct link to Background: using a local model as a &quot;toolshim&quot;" title="Direct link to Background: using a local model as a &quot;toolshim&quot;">​</a></h2>
+<p>The goal is to allow goose to work with the widest variety of models possible. A "toolshim" in this case is a thin layer which sits between the main model doing the agent work, and the tools that can perform actual actions (making the agent take action, vs being a chatbot). Previously we have been trying this approach with open models including in this <a href="https://block.github.io/goose/blog/2025/03/31/goose-benchmark" target="_blank" rel="noopener noreferrer">past benchmark</a> post. A toolshim, if it can work, unlocks both powerful cutting edge models (open weight and closed) which while may perform well on various benchmarks, fall well short when tool calling for agents is required (or perhaps don't, by design, support tool calling at all, such as the case with some reasoning models).</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="proposal-fine-tune-a-lightweight-toolshim-model-up-to-12b">Proposal: Fine-tune a lightweight toolshim model (up to 12b)<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#proposal-fine-tune-a-lightweight-toolshim-model-up-to-12b" class="hash-link" aria-label="Direct link to Proposal: Fine-tune a lightweight toolshim model (up to 12b)" title="Direct link to Proposal: Fine-tune a lightweight toolshim model (up to 12b)">​</a></h2>
+<p>Develop a dedicated toolshim model that translates open-source model outputs into well-structured tool calls, acting as a reliable post-processor to standardize across model families trained that currently exhibit inconsistent and unreliable tool call generation behavior. We do not use tool calling apis even if available, but provide tool context in the system prompts.</p>
+<p>We already experimented with this in the <a href="https://block.github.io/goose/blog/2025/03/31/goose-benchmark" target="_blank" rel="noopener noreferrer">benchmarking effort</a>, finding that phi4 (14b) and gemma3 (27b) achieved close performance to llama3.3 (70b) when used with a generic local model (mistral-nemo) as the shim. This shows potential for furthering their performance with more focused attention on improving the shim's performance.</p>
+<p>Toolshim System Sketch:</p>
+<p><img decoding="async" loading="lazy" alt="Toolshim System Sketch" src="https://block.github.io/goose/assets/images/sketch-0bb4b0e6fb7fdbd194fff4db41c3806f.png" width="1132" height="828" class="img_ev3q"></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="key-observations-on-current-challenges-with-tool-call-generation">Key Observations on Current Challenges with Tool Call Generation<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#key-observations-on-current-challenges-with-tool-call-generation" class="hash-link" aria-label="Direct link to Key Observations on Current Challenges with Tool Call Generation" title="Direct link to Key Observations on Current Challenges with Tool Call Generation">​</a></h2>
+<ol>
+<li>
+<p><strong>Model training templates are inconsistent</strong><br>
+<!-- -->For example, <a href="https://qwen.readthedocs.io/en/latest/framework/function_call.html" target="_blank" rel="noopener noreferrer">Qwen models use</a> <a href="https://github.com/NousResearch/Hermes-Function-Calling" target="_blank" rel="noopener noreferrer">Hermes-style tool formats</a>, while Openhands generates Markdown despite explicit JSON instructions—suggesting training data shape can have an underestimated impact on reliable tool call generation</p>
+</li>
+<li>
+<p><strong>Current workarounds aren't enough</strong><br>
+<a href="https://docs.vllm.ai/en/latest/features/tool_calling.html" target="_blank" rel="noopener noreferrer">Model providers may implement approaches like guided decoding</a> to guarantee validly-parsable function calls, but these may not produce high-quality outputs if the model wasn't trained on schemas matching what users provide in context. The widespread challenges with tool use with Llama4 may be indicative of the challenges providers have in effectively serving new models to make full use of their capabilities</p>
+</li>
+<li>
+<p><strong>Hosting providers vary wildly in how well they work with tool calls</strong><br>
+<!-- -->Hosting providers helpfully provide chat templates or similar which can, in many cases, prompt some of the larger models to reply correctly formatted tool calls, and thus can support openai-like apis where tools are provided, but in practice these can fall short after one shot, or vary a lot between providers (an issue exacerbated if using model routers such as openrouter or huggingface hosted inference)</p>
+</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="some-examples-of-model-specific-quirks-wrt-tool-calling">Some examples of model-specific quirks wrt tool calling:<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#some-examples-of-model-specific-quirks-wrt-tool-calling" class="hash-link" aria-label="Direct link to Some examples of model-specific quirks wrt tool calling:" title="Direct link to Some examples of model-specific quirks wrt tool calling:">​</a></h3>
+<p><strong>Openhands</strong>: Despite instructions to generate JSON-formatted tool calls, still generates markdown (likely due to shape of their training data)</p>
+<p><img decoding="async" loading="lazy" alt="Openhands example" src="https://block.github.io/goose/assets/images/openhands-7fe1d878c7108c846e6275ed3157be6e.png" width="1287" height="233" class="img_ev3q"></p>
+<p><strong>Llama4 Maverick</strong>: Generates malformed tool calls, but performs somewhat better when specifically prompted to generate tool calls as JSON</p>
+<p>With "tool calls" on OpenRouter:<br>
+<img decoding="async" loading="lazy" alt="OpenRouter tool calls example" src="https://block.github.io/goose/assets/images/openrouter_toolcalls-01ef22c3d91ff5580c49b89f6599293f.png" width="1295" height="621" class="img_ev3q"></p>
+<p>Llama4 Maverick when instead just prompted to generate tool calls in JSON:<br>
+<img decoding="async" loading="lazy" alt="Llama4 example" src="https://block.github.io/goose/assets/images/llama4-2ebc0ab8f18d31c450ee2bf34aa82191.png" width="1296" height="767" class="img_ev3q"></p>
+<p><strong>Gemma3</strong>: A DeepMind engineer <a href="https://www.philschmid.de/gemma-function-calling" target="_blank" rel="noopener noreferrer">suggested providing a function calling template in-context in Python format</a><br>
+<!-- -->The 12B model also outputs valid JSON tool calls reasonably well:<br>
+<img decoding="async" loading="lazy" alt="Gemma3 example" src="https://block.github.io/goose/assets/images/gemma3-eca1a363fea57b818a967883e567a481.png" width="1293" height="299" class="img_ev3q"></p>
+<p><strong>Functionary models</strong>: <a href="https://github.com/MeetKai/functionary/issues/302#issuecomment-2650187280" target="_blank" rel="noopener noreferrer">Ollama couldn't support the tool calling capabilities</a> because these models were trained with prompt templates in a TypeScript schema incompatible with Ollama's supported JSON schema</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="experimentation-approach">Experimentation Approach<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#experimentation-approach" class="hash-link" aria-label="Direct link to Experimentation Approach" title="Direct link to Experimentation Approach">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="data-collection">Data Collection<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#data-collection" class="hash-link" aria-label="Direct link to Data Collection" title="Direct link to Data Collection">​</a></h3>
+<ul>
+<li>Extract user messages from historical Goose sessions, and for messages followed by tool calls from Anthropic/OpenAI (all tool calls up to today):<!-- -->
+<ul>
+<li><strong>Regenerate tool calls with open models:</strong> Regenerate the tool calls with the most capable open models that have supported tool calling capabilities (e.g., QwQ, Qwen, deepseek chat v3)</li>
+<li><strong>Generate json/markdown-formatted tool calls to parse:</strong> Instruct the most capable open models (e.g., DeepSeek-r1, Llama4, Gemma3), that don't necessarily have strong tool calling to output tool calls in the correct schema (JSON/markdown). Parse the output into the appropriate tool calls.</li>
+<li><strong>Discard any malformed tool calls, tool calls that fail to properly execute, or tool calls that meet other rejection criteria</strong></li>
+</ul>
+</li>
+<li>Generate a few thousand examples with this approach</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="modeling">Modeling<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#modeling" class="hash-link" aria-label="Direct link to Modeling" title="Direct link to Modeling">​</a></h3>
+<p>Fine tune small models like mistral-nemo (14b), gemma 4-12b, qwen2.5-coder 7-14b.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="evaluations">Evaluations<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#evaluations" class="hash-link" aria-label="Direct link to Evaluations" title="Direct link to Evaluations">​</a></h3>
+<p>Test with Goosebench evals run in the benchmarking blogpost. We can directly compare performance of models with and without the finetuned toolshim models supporting them.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="future-approaches">Future approaches<a href="https://block.github.io/goose/blog/2025/04/11/finetuning-toolshim#future-approaches" class="hash-link" aria-label="Direct link to Future approaches" title="Direct link to Future approaches">​</a></h2>
+<p>On top of local models, we would like to consider parsers, parser combinators, context-free grammars and more (even very large ones) which are constructed based on 1000s of examples of tool results. Even if large, these can operate at every low latencies extracting parameters for suggested tool calls. There are likely other structured text extraction techniques to be explored to assist with discovery and extraction of tool calls from rich responses from powerful general models.</p>
+]]></content>
+        <author>
+            <name>Alice Hau</name>
+        </author>
+        <author>
+            <name>Michael Neale</name>
+        </author>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[A Visual Guide To MCP Ecosystem]]></title>
+        <id>https://block.github.io/goose/blog/2025/04/10/visual-guide-mcp</id>
+        <link href="https://block.github.io/goose/blog/2025/04/10/visual-guide-mcp"/>
+        <updated>2025-04-10T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Visual breakdown of MCP: How your AI agent, tools, and models work together.]]></summary>
+        <content type="html"><![CDATA[<p><img decoding="async" loading="lazy" alt="blog cover" src="https://block.github.io/goose/assets/images/mcpblog-40894789122bda594a8576ebcb67a2d8.png" width="2240" height="1260" class="img_ev3q"></p>
+<p>You ever open a GitHub repo or blog post, read the first sentence, and immediately feel like you’ve stumbled into a PhD dissertation?</p>
+<p>Yeah. Same.</p>
+<p>MCP (Model Context Protocol) sounds complicated, but it’s really not. Think of this as your go to cheat sheet, no whitepapers, no academic jargon, just plain English and a few good visuals.</p>
+<p>Let's break this down together.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="what-is-mcp-in-plain-english">What Is MCP in Plain English?<a href="https://block.github.io/goose/blog/2025/04/10/visual-guide-mcp#what-is-mcp-in-plain-english" class="hash-link" aria-label="Direct link to What Is MCP in Plain English?" title="Direct link to What Is MCP in Plain English?">​</a></h2>
+<p>MCP is like a universal translator between your AI agent, like Goose, and external tools, files, databases, APIs, you name it.</p>
+<p>It gives your agent a way to ask questions, run tools, store/retrieve context, and keep track of everything it knows.</p>
+<p>Instead of cramming everything into one prompt like “here’s 10k tokens worth of context, good luck,” MCP helps the model pull what it needs, when it needs it.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="who-are-the-players">Who Are The Players?<a href="https://block.github.io/goose/blog/2025/04/10/visual-guide-mcp#who-are-the-players" class="hash-link" aria-label="Direct link to Who Are The Players?" title="Direct link to Who Are The Players?">​</a></h2>
+<p><img decoding="async" loading="lazy" alt="players" src="https://block.github.io/goose/assets/images/players-e2b075360b81c342d61ed84bc51c1e97.png" width="2320" height="818" class="img_ev3q"></p>
+<ul>
+<li>
+<p><strong>User</strong> – You, the person with the big ideas and messy problems</p>
+</li>
+<li>
+<p><strong>Agent</strong> – The AI agent, Goose, living in your CLI, IDE, or desktop application</p>
+</li>
+<li>
+<p><strong>LLM</strong> – The model that does the reasoning (like Claude, GPT-4, etc.)</p>
+</li>
+<li>
+<p><strong>MCP Servers (Extensions)</strong> – Goose's toolbox: built-in and custom extensions that give goose the ability to execute tasks</p>
+</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="how-do-they-communicate">How Do They Communicate?<a href="https://block.github.io/goose/blog/2025/04/10/visual-guide-mcp#how-do-they-communicate" class="hash-link" aria-label="Direct link to How Do They Communicate?" title="Direct link to How Do They Communicate?">​</a></h2>
+<p>Lets take a look at how all the players work together:</p>
+<p><img decoding="async" loading="lazy" alt="Visual guide" src="https://block.github.io/goose/assets/images/visualguide-9b44af19be52631e84712cad31849bee.png" width="1056" height="1516" class="img_ev3q">
+In this flow, the user kicks things off by giving Goose a prompt. Goose gets the prompt ready, along with its available tools and any relevant context, and hands it off to the LLM. The LLM decides which tools it needs to complete the task. Goose then routes those tool calls to the right MCP servers, and they execute the tasks. As steps of the task are being completed, informs you, the user, of what it's done and can also loop with the LLM as needed.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="heres-an-analogy">Here's An Analogy<a href="https://block.github.io/goose/blog/2025/04/10/visual-guide-mcp#heres-an-analogy" class="hash-link" aria-label="Direct link to Here's An Analogy" title="Direct link to Here's An Analogy">​</a></h2>
+<p>Let’s make this even clearer with a James Bond analogy. Sometimes a story makes it all click.</p>
+<p><img decoding="async" loading="lazy" alt="james bond" src="https://block.github.io/goose/assets/images/james-89c46143c593bee36832667ded97233c.png" width="1266" height="844" class="img_ev3q"></p>
+<p>If you’ve ever seen a James Bond movie, you know the scene,
+Bond walks into Q’s lab before the mission.
+Q opens up the suitcase of gadgets, exploding pens, invisible cars, grappling watches, you name it.</p>
+<p>Goose is <em>like</em> Q in this situation.
+The suitcase is already packed with tools, built-in and custom extensions (MCP servers).</p>
+<p>Before the LLM (Bond) starts the mission, Goose gives it the full briefing:</p>
+<blockquote>
+<p><em>"Here’s your target (the prompt). Here’s your gadget suitcase (the extensions you can use). Good luck."</em></p>
+</blockquote>
+<p>The MCP servers?</p>
+<p>That’s the hidden team in the back actually building the gadgets and handing them over when Bond needs them in the field.</p>
+<p>The LLM (Bond) picks the right gadgets for the mission, Goose routes the request to the right MCP server, MCP makes sure they work, and the whole operation runs smoothly.</p>
+<p>Without Goose handing over the gadget suitcase, the model would just show up in the field with nothing but a tuxedo and a smile, and we don't want to know how that ends.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="your-turn">Your Turn<a href="https://block.github.io/goose/blog/2025/04/10/visual-guide-mcp#your-turn" class="hash-link" aria-label="Direct link to Your Turn" title="Direct link to Your Turn">​</a></h2>
+<p>Now that you’ve got the basics down, and you understand how the MCP ecosystem works, it’s time to try it yourself.</p>
+<p>The <a href="https://block.github.io/goose/docs/quickstart">Quickstart Guide</a> walks you through connecting your first MCP server.</p>
+<p>And when you’re ready to explore more, head over to the <a href="https://block.github.io/goose/docs/category/tutorials">tutorials section</a> in the docs — it has step-by-step guides and short video demos to show you how to connect to a variety of MCP servers.</p>
+<p>And don't forget to <a href="https://discord.gg/block-opensource" target="_blank" rel="noopener noreferrer">join the community</a> to see what others are building, ask questions, or to simply connect.</p>
+]]></content>
+        <author>
+            <name>Ebony Louis</name>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[How to Vibe Code Responsibly (with Goose)]]></title>
         <id>https://block.github.io/goose/blog/2025/04/08/vibe-code-responsibly</id>
@@ -503,7 +723,7 @@ If you’d like to try out the toolshim, check out our <a href="https://block.gi
 <li>The device/location the agent is running from</li>
 </ol>
 <p>Having consistent mechanisms for identifying usage in this manner allows companies to protect users from integrations with malicious agents and protect their platforms from attacks by unwanted agentic tooling.</p>
-<p>The model context protocol itself has a specification for <a href="https://spec.modelcontextprotocol.io/specification/2025-03-26/basic/authorization/" target="_blank" rel="noopener noreferrer">OAuth that at the time of writing was a draft, but has since been released here</a>.</p>
+<p>The model context protocol itself has a <a href="https://spec.modelcontextprotocol.io/specification/2025-03-26/basic/authorization/" target="_blank" rel="noopener noreferrer">specification for OAuth</a> that at the time of writing was a draft, but has since been released here.</p>
 <p>This flow considers the following steps:</p>
 <ol>
 <li>Client/Agent initiates standard OAuth flow with MCP server</li>
@@ -522,7 +742,7 @@ If you’d like to try out the toolshim, check out our <a href="https://block.gi
 <p>Specifically, building server side solutions to alert the user to the expected changes and the agent performing them and seeking consent will likely be a critical primitive for APIs of the future. The goal of this would be to ultimately keep irreversible or hard to reverse actions gated behind human interaction or approval.</p>
 <p>For example, for an agent tasked with writing IaC, this could be as simple as requesting a human approver before applying/deploying the IaC.</p>
 <p>In client side agents this would improve data integrity in the event the underlying LLM hallucinated or was tampered with externally through malicious MCP or data sources.</p>
-<p>In the latest release of the <a href="https://github.com/modelcontextprotocol/specification/blob/9236eb1cbfa02c17ab45c83a7bdbe55c450070be/schema/2025-03-26/schema.ts#L730" target="_blank" rel="noopener noreferrer">protocol an enhancement we love is being able to annotate a tool to indicate to clients that tool actions are “readOnly” or “destructive”. Using this to decide when to require a secondary approval from the user before performing a given action provides significantly better protections for users</a>.</p>
+<p>In the latest release of the protocol, an enhancement we love is being able to <a href="https://github.com/modelcontextprotocol/specification/blob/9236eb1cbfa02c17ab45c83a7bdbe55c450070be/schema/2025-03-26/schema.ts#L730" target="_blank" rel="noopener noreferrer">annotate a tool</a> to indicate to clients that tool actions are "readOnly" or "destructive". Using this to decide when to require a secondary approval from the user before performing a given action provides significantly better protections for users.</p>
 <p>While we encourage an LLM based processing step to check for potentially malicious commands, <strong>having a deterministic aspect to higher risk commands in tandem ensures good access control is a more accurate way to provide protections</strong>.</p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="securing-the-mcp-supply-chain">Securing the MCP Supply Chain<a href="https://block.github.io/goose/blog/2025/03/31/securing-mcp#securing-the-mcp-supply-chain" class="hash-link" aria-label="Direct link to Securing the MCP Supply Chain" title="Direct link to Securing the MCP Supply Chain">​</a></h3>
 <p>At this stage the majority of MCPs are being installed and run client side via commands like docker, uvx, pipx and npx. In practice this means when users install MCP based extensions they are providing arbitrary code execution privileges to the MCP Server.</p>
@@ -1144,239 +1364,6 @@ If you’d like to try out the toolshim, check out our <a href="https://block.gi
         <author>
             <name>Angie Jones</name>
             <uri>https://angiejones.tech</uri>
-        </author>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[6 Essential Tips for Working with Goose]]></title>
-        <id>https://block.github.io/goose/blog/2025/03/06/goose-tips</id>
-        <link href="https://block.github.io/goose/blog/2025/03/06/goose-tips"/>
-        <updated>2025-03-06T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[Practical tips to help you use Goose more effectively and efficiently.]]></summary>
-        <content type="html"><![CDATA[<p><img decoding="async" loading="lazy" alt="goose tips" src="https://block.github.io/goose/assets/images/goose-tips-4add28cc7201737dfb468ad11980f070.png" width="1200" height="630" class="img_ev3q"></p>
-<p>Working with AI agents can sometimes feel unpredictable. After using Goose extensively for the last few months, I've compiled a few key tips that will help you get the most out of this tool. No matter your workflow, these guidelines will help you work more efficiently with Goose.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="1-keep-sessions-focused-and-short">1. Keep Sessions Focused and Short<a href="https://block.github.io/goose/blog/2025/03/06/goose-tips#1-keep-sessions-focused-and-short" class="hash-link" aria-label="Direct link to 1. Keep Sessions Focused and Short" title="Direct link to 1. Keep Sessions Focused and Short">​</a></h2>
-<p>One of the most common mistakes users make is trying to accomplish too much in a single session. While it might seem efficient to keep the conversation going, longer sessions can actually hinder Goose's performance.</p>
-<p>Every message adds to the context window, which is the amount of conversation history Goose can retain at any given time. This history is made up of tokens, the individual pieces of text (words or even parts of words) that Goose processes to generate responses. More tokens don’t just increase processing time, they also contribute to LLM usage costs. And once the context window fills up, older messages get pushed out, which can lead to loss of important details or unexpected behavior.</p>
-<p>Think of it like keeping too many browser tabs open. Eventually, it impacts performance. Instead, start fresh sessions for distinct tasks. Don't worry about losing context; that's exactly what the <a href="https://block.github.io/goose/docs/tutorials/memory-mcp">Memory extension</a> is for. Keeping sessions focused and concise ensures more accurate, relevant responses while also keeping your LLM costs under control.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="2-minimize-active-extensions">2. Minimize Active Extensions<a href="https://block.github.io/goose/blog/2025/03/06/goose-tips#2-minimize-active-extensions" class="hash-link" aria-label="Direct link to 2. Minimize Active Extensions" title="Direct link to 2. Minimize Active Extensions">​</a></h2>
-<p>When it comes to Goose extensions, less is often more. It's tempting to enable <a href="https://www.pulsemcp.com/servers" target="_blank" rel="noopener noreferrer">every available extension</a> just in case (I'm guilty of this!), but this approach can be counterproductive. Each active extension adds to the system prompt, increasing complexity and making Goose work harder to decide which tools to use.</p>
-<p>Consider this: if you're cooking in a kitchen, having every possible utensil and appliance out on the counter doesn't make you a better chef. It just creates clutter and confusion. The same principle applies here.</p>
-<p>Go ahead and install any extensions that interest you, but <a href="https://block.github.io/goose/docs/getting-started/using-extensions#enablingdisabling-extensions">keep them disabled</a> until you need them. Start with the built-in <a href="https://block.github.io/goose/docs/tutorials/developer-mcp">Developer extension</a> enabled, which is surprisingly powerful on its own, and only enable others when you need their specific capabilities. This leads to faster responses, lower token usage, and often more focused solutions.</p>
-<div class="theme-admonition theme-admonition-tip admonition_xJq3 alert alert--success"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"></path></svg></span>Bonus Tip</div><div class="admonitionContent_BuS1"><p>Before starting a complex task, ask Goose about its current capabilities. A simple prompt like "Do you have tools available to work with [specific technology/service]?" can save time and prevent false starts. Goose can tell you whether it has the necessary tools for your task, and if not, suggest which extensions you might need to enable. This quick check ensures you have the right tools ready before diving in too deep.</p></div></div>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="3-teach-goose-with-goosehints-files">3. Teach Goose with .goosehints Files<a href="https://block.github.io/goose/blog/2025/03/06/goose-tips#3-teach-goose-with-goosehints-files" class="hash-link" aria-label="Direct link to 3. Teach Goose with .goosehints Files" title="Direct link to 3. Teach Goose with .goosehints Files">​</a></h2>
-<p>One of Goose's most powerful features is its ability to understand context through <a href="https://block.github.io/goose/docs/guides/using-goosehints">.goosehints</a> files, acting like a "README for AI". These hints can be set at both the project and global levels to guide Goose’s responses.</p>
-<p>At the project level, placing .goosehints files in your directory helps Goose understand your structure, conventions, and special considerations. You can even use multiple files - one at the root for overall guidance and others in specific directories for more granular instructions (e.g., frontend styling conventions).</p>
-<p>Beyond projects, global .goosehints files (<code>~/.config/goose/.goosehints</code>) apply across all sessions, making them perfect for things like:</p>
-<ul>
-<li>Personal coding style preferences</li>
-<li>Favorite tools and workflows</li>
-<li>Standard testing practices</li>
-<li>Documentation conventions</li>
-<li>Git commit message formatting</li>
-</ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="4-choose-the-right-mode-for-your-workflow">4. Choose the Right Mode for Your Workflow<a href="https://block.github.io/goose/blog/2025/03/06/goose-tips#4-choose-the-right-mode-for-your-workflow" class="hash-link" aria-label="Direct link to 4. Choose the Right Mode for Your Workflow" title="Direct link to 4. Choose the Right Mode for Your Workflow">​</a></h2>
-<p>Goose offers <a href="https://block.github.io/goose/docs/guides/goose-permissions">different modes</a> that determine how much autonomy it has when modifying files, using extensions, and performing automated actions.</p>
-<ul>
-<li>
-<p>⚡️ <strong>Auto Mode (Default):</strong> Goose can modify, create, and delete files, as well as use extensions, without requiring approval. Best for users who want seamless automation.</p>
-</li>
-<li>
-<p>✅ <strong>Approve Mode:</strong> Goose asks for confirmation before making changes. With <a href="https://block.github.io/goose/docs/guides/goose-permissions#smart-approve">Smart Approve</a> enabled, it evaluates risk levels and prompts for high-risk actions while executing safe ones automatically.</p>
-</li>
-<li>
-<p>💬 <strong>Chat Mode:</strong> Goose operates in chat-only mode, without modifying files or using extensions. Ideal for users who want AI assistance without automation.</p>
-</li>
-</ul>
-<p>If you’re new to Goose or working on a critical project, Approve Mode offers a great balance of automation and oversight. For hands-free workflows, Auto Mode keeps things moving, while Chat Mode is perfect for brainstorming and general AI assistance.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="5-guide-goose-with-step-by-step-execution">5. Guide Goose with Step-by-Step Execution<a href="https://block.github.io/goose/blog/2025/03/06/goose-tips#5-guide-goose-with-step-by-step-execution" class="hash-link" aria-label="Direct link to 5. Guide Goose with Step-by-Step Execution" title="Direct link to 5. Guide Goose with Step-by-Step Execution">​</a></h2>
-<p>Complex tasks are best handled in stages, and Goose excels when you allow it to break problems into manageable steps. Instead of expecting an instant solution, ask Goose to generate a step-by-step plan first. Review the plan to ensure it aligns with your goals, then let Goose execute each step in sequence.</p>
-<p>This structured approach not only improves accuracy but also gives you more control over the process. You can pause, adjust, or refine each step as needed, giving you more control while ensuring better results.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="6-refine-and-iterate-for-better-responses">6. Refine and Iterate for Better Responses<a href="https://block.github.io/goose/blog/2025/03/06/goose-tips#6-refine-and-iterate-for-better-responses" class="hash-link" aria-label="Direct link to 6. Refine and Iterate for Better Responses" title="Direct link to 6. Refine and Iterate for Better Responses">​</a></h2>
-<p>Goose is powerful, but like any AI, it sometimes needs a second pass to get things right. If you don’t get the response you need, try refining your prompt or asking Goose to adjust its answer.</p>
-<p>Good iteration techniques include:</p>
-<ul>
-<li>Asking Goose to explain its reasoning before taking action</li>
-<li>Requesting alternative solutions to compare different approaches</li>
-<li>Asking for a step-by-step breakdown of its thought process</li>
-<li>Rewording prompts to add more detail or constraints</li>
-</ul>
-<p>For example, instead of asking, "Help me debug this error," try, "I’m getting a NullPointerException in my Java method. Here’s the stack trace. What could be causing it?" A small tweak in how you ask can dramatically improve the quality of the response.</p>
-<hr>
-<p>By following these tips, you'll be able to work more effectively with Goose, getting better results while using fewer resources. Remember, the goal is to solve problems efficiently and effectively. Whether you're writing code, automating tasks, or managing complex projects, these guidelines will help you make the most of what Goose has to offer.</p>
-]]></content>
-        <author>
-            <name>Angie Jones</name>
-            <uri>https://angiejones.tech</uri>
-        </author>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Let A Team of AI Agents Do It For You]]></title>
-        <id>https://block.github.io/goose/blog/2025/02/21/gooseteam-mcp</id>
-        <link href="https://block.github.io/goose/blog/2025/02/21/gooseteam-mcp"/>
-        <updated>2025-02-21T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[Community Spotlight on Cliff Hall's GooseTeam MCP server.]]></summary>
-        <content type="html"><![CDATA[<p><img decoding="async" loading="lazy" alt="blog banner" src="https://block.github.io/goose/assets/images/gooseteam-mcp-082fa2890c313519c2a1637ca979c219.png" width="1206" height="633" class="img_ev3q"></p>
-<p>During our <a href="https://youtu.be/9tq-QUnE29U" target="_blank" rel="noopener noreferrer">previous livestream</a>, Aaron Goldsmith, Infrastructure Operations Engineer at Cash App, showed a team of Goose AI agents collaborating in real time to create a website. Our community loved it so much, Cliff Hall was inspired to iterate on that idea and create a GooseTeam MCP server.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="the-original-protocol">The Original Protocol<a href="https://block.github.io/goose/blog/2025/02/21/gooseteam-mcp#the-original-protocol" class="hash-link" aria-label="Direct link to The Original Protocol" title="Direct link to The Original Protocol">​</a></h2>
-<p>Aaron Goldsmith made an AI agent team consisting of multiple Goose instances a reality with his lightweight <a href="https://gist.github.com/AaronGoldsmith/114c439ae67e4f4c47cc33e829c82fac" target="_blank" rel="noopener noreferrer">Agent Communication Protocol</a>. With it, each Goose agent enters the chat, gets assigned a role (e.g. Project Coordinator, Researcher, Web Developer), and works on its part of a given task. The protocol specifies instructions guiding how the agents should talk and behave, allowing multiple Goose agents to collaborate. It also specifies that communication between the agents should be done via a Python-based websocket server with text/markdown .</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="gooseteam-mcp-server">GooseTeam MCP Server<a href="https://block.github.io/goose/blog/2025/02/21/gooseteam-mcp#gooseteam-mcp-server" class="hash-link" aria-label="Direct link to GooseTeam MCP Server" title="Direct link to GooseTeam MCP Server">​</a></h2>
-<p>Introducing <a href="https://github.com/cliffhall/GooseTeam" target="_blank" rel="noopener noreferrer">GooseTeam</a>, created by Software Architect and community member, Cliff Hall. GooseTeam takes Aaron's protocol and iterates on it into an MCP server and collaboration protocol for Goose Agents. With features like task management, message storage, and agent waiting, you can have an entire team of Goose agents work together on a task or project for you.</p>
-<p>A Goose agent with the Project Coordinator role will assign roles to other agents, your connected agents will send messages that can retrieved at any time, and your team of agents will connect to the same MCP server to collaborate together.</p>
-<p><img decoding="async" loading="lazy" alt="Goose Agents" src="https://block.github.io/goose/assets/images/gooseteam-agents-61bd50464e81d67f3f51ce2e3a2be223.png" width="3768" height="758" class="img_ev3q"></p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="a-new-way-to-goose">A New Way to Goose<a href="https://block.github.io/goose/blog/2025/02/21/gooseteam-mcp#a-new-way-to-goose" class="hash-link" aria-label="Direct link to A New Way to Goose" title="Direct link to A New Way to Goose">​</a></h2>
-<p>Working with a team of AI agents on a task is a game changer. Instead of getting confused as to how to improve your prompt engineering on your own or work across sessions manually, tools like Cliff's GooseTeam or Aaron's Agent Communication Protocol help us make sure AI agents like Goose are doing the work for us as efficiently as possible. The possibilities feel endless!</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="get-your-contribution-featured">Get Your Contribution Featured<a href="https://block.github.io/goose/blog/2025/02/21/gooseteam-mcp#get-your-contribution-featured" class="hash-link" aria-label="Direct link to Get Your Contribution Featured" title="Direct link to Get Your Contribution Featured">​</a></h2>
-<p>Hopefully this contribution inspired you as much as it inspired our community. If you have a Goose contribution or project you'd like to share with our community, join our <a href="https://discord.gg/block-opensource" target="_blank" rel="noopener noreferrer">Discord</a> and share your work in the <strong>#share-your-work</strong> channel. You may just be featured on our livestream or get a cool prize. 👀 You can also star Goose on GitHub or follow us on social media so you never miss an update from us. Until next time!</p>
-]]></content>
-        <author>
-            <name>Tania Chakraborty</name>
-        </author>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Agentic AI and the MCP Ecosystem]]></title>
-        <id>https://block.github.io/goose/blog/2025/02/17/agentic-ai-mcp</id>
-        <link href="https://block.github.io/goose/blog/2025/02/17/agentic-ai-mcp"/>
-        <updated>2025-02-17T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[A 101 introduction to AI Agents]]></summary>
-        <content type="html"><![CDATA[<p><img decoding="async" loading="lazy" alt="blog banner" src="https://block.github.io/goose/assets/images/agentic-ai-with-mcp-1e3050cc8d8ae7a620440e871ad9f0d2.png" width="1200" height="630" class="img_ev3q"></p>
-<p>It seems like yesterday when we all were wowed by generative AI and specifically the chat interfaces that made interacting with large language models (LLMs) accessible to everyday people.</p>
-<p>As amazing as this was, it was only the beginning. The next wave of AI is agentic, meaning AI systems that don't just respond to prompts but take actions, make decisions, and interact with external systems. This is accomplished via <strong>AI agents</strong>.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="what-are-ai-agents">What are AI Agents?<a href="https://block.github.io/goose/blog/2025/02/17/agentic-ai-mcp#what-are-ai-agents" class="hash-link" aria-label="Direct link to What are AI Agents?" title="Direct link to What are AI Agents?">​</a></h2>
-<p>When you interact with chatbots that use AI, like ChatGPT, you can ask it how to do something, and it'll provide step-by-step instructions.</p>
-<p>For example, if I ran into an error while coding, I could paste the error message into ChatGPT and ask it to help me debug. Because ChatGPT doesn't have access to my codebase, it would speculate on the cause of my error and give me a couple of possible solutions to try. I'd then manually try these proposed solutions and return to inform ChatGPT of the results. We'd continue this back and forth until the error is resolved or I give up.</p>
-<p>AI Agents greatly simplify this flow by talking with the LLM on my behalf and taking direct action to fix the problem.</p>
-<blockquote>
-<p><em><strong>An AI agent is a system that operates autonomously to accomplish a goal.</strong></em></p>
-</blockquote>
-<p>Because AI agents are connected to systems, they can analyze a situation, determine the next action, and execute it without much, if any, human intervention. This capability turns them from passive chatbots into automation assistants.</p>
-<p>By using an AI agent, I can simply say "fix the error" and it'll have context about what's wrong and automatically fix the error for me.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="how-ai-agents-work-with-llms">How AI Agents Work with LLMs<a href="https://block.github.io/goose/blog/2025/02/17/agentic-ai-mcp#how-ai-agents-work-with-llms" class="hash-link" aria-label="Direct link to How AI Agents Work with LLMs" title="Direct link to How AI Agents Work with LLMs">​</a></h2>
-<p>LLMs (e.g. GPT-4o, Claude 3.5 Sonnet, Gemini 2.0, etc) provide cognitive abilities to AI agents. Most AI agents will have a chat interface themselves where you type your prompt, and the agent will send this prompt to an LLM. At the same time, the agent will also inform the LLM of what <strong>tools</strong> it has access to.</p>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="tool-calling">Tool Calling<a href="https://block.github.io/goose/blog/2025/02/17/agentic-ai-mcp#tool-calling" class="hash-link" aria-label="Direct link to Tool Calling" title="Direct link to Tool Calling">​</a></h3>
-<p>Tools are one of the most important aspects of agentic AI. AI agents are able to execute API calls via <strong>tool calling</strong>.</p>
-<p>Let's look at an example:</p>
-<ol>
-<li>
-<p>A user sends a prompt to their AI agent: <em>"Fix the NullPointerException in my UserService.java file."</em></p>
-</li>
-<li>
-<p>The agent sends the user request and the list of its available tools to the LLM in a structured format.</p>
-</li>
-</ol>
-<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">User Request: "Fix the NullPointerException in my UserService.java file."</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Available Tools:</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">1. read_file(file_path: str) → Returns the contents of the specified file.</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">2. analyze_code(file_content: str) → Identifies potential errors and suggests fixes.</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">3. edit_file(file_path: str, modifications: dict) → Applies code changes.</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">4. run_tests() → Executes the test suite and returns results.</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
-<ol start="3">
-<li>The LLM analyzes the request and selects the appropriate tools. It determines that it needs to read the file in order to help.</li>
-</ol>
-<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token punctuation" style="color:#393A34">[</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">"tool"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">"read_file"</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">"parameters"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"> </span><span class="token property" style="color:#36acaa">"file_path"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">"UserService.java"</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">]</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
-<ol start="4">
-<li>The agent executes <code>read_file()</code> and sends the code to the LLM.</li>
-</ol>
-<div class="language-java codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-java codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">public class UserService {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    private Database db;</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    public void getUser(String userId) {</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        System.out.println(db.findUserById(userId).getName());</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    }</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">}</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
-<ol start="5">
-<li>The LLM recognizes the issue (<code>db</code> variable is not initialized) and now selects another tool to fix the issue.</li>
-</ol>
-<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token punctuation" style="color:#393A34">[</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">"tool"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">"edit_file"</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">"parameters"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token property" style="color:#36acaa">"file_path"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">"UserService.java"</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token property" style="color:#36acaa">"modifications"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        </span><span class="token property" style="color:#36acaa">"line_number"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">3</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        </span><span class="token property" style="color:#36acaa">"replacement"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">"private Database db = new Database();"</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">]</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
-<ol start="6">
-<li>
-<p>The agent executes <code>edit_file()</code> to fix <code>UserService.java</code> and informs the LLM.</p>
-</li>
-<li>
-<p>The LLM determines that it's a good idea to run tests to confirm the change.</p>
-</li>
-</ol>
-<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token punctuation" style="color:#393A34">[</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">"tool"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">"run_tests"</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token property" style="color:#36acaa">"parameters"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">]</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
-<ol start="8">
-<li>The agent executes <code>run_tests()</code> and provides the results to the LLM.</li>
-</ol>
-<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">"tests_passed"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token boolean" style="color:#36acaa">true</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token property" style="color:#36acaa">"failed_tests"</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
-<ol start="9">
-<li>The LLM generates a final message that the agent then presents to the user.</li>
-</ol>
-<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">I’ve fixed the NullPointerException in UserService.java by initializing the db variable. All tests have passed. Let me know if you need further modifications!</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
-<p>Without tool calling, LLMs would only guess answers based on their training data. But by using tools, agents can directly access the data they need to make accurate decisions and take actions.</p>
-<p>It's worth noting that not all agents are the same when it comes to tool access. Most proprietary agents are tightly scoped to a specific LLM and a predefined set of tools, as companies build agents tailored for their own applications.</p>
-<p>Other agents, like Goose, are more extensible, allowing users to configure it with the LLM of their choice, as well as add tools for various APIs, databases, and even <a href="https://block.github.io/goose/docs/tutorials/jetbrains-mcp">local environments like IDEs</a>. However, for agents to scale across different tools and systems without requiring custom integrations for each one, they need a standardized way to discover, call, and manage tools. This is exactly what the <a href="https://modelcontextprotocol.io/introduction" target="_blank" rel="noopener noreferrer">Model Context Protocol (MCP)</a> provides.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mcp-ecosystem">MCP Ecosystem<a href="https://block.github.io/goose/blog/2025/02/17/agentic-ai-mcp#mcp-ecosystem" class="hash-link" aria-label="Direct link to MCP Ecosystem" title="Direct link to MCP Ecosystem">​</a></h2>
-<p>Traditional AI integrations require custom API calls for every system, making scaling difficult. MCP solves this by providing an open, universal protocol for agents to communicate with external systems dynamically.</p>
-<p>With MCP, an agent like Goose can:</p>
-<ul>
-<li>connect to any API without a developer writing manual integration code</li>
-<li>integrate with cloud services, dev tools, databases, and enterprise systems</li>
-<li>retrieve and store context to enhance reasoning</li>
-</ul>
-<p>At the time of this writing, there are more than <a href="https://www.pulsemcp.com/servers" target="_blank" rel="noopener noreferrer">1000 MCP servers</a> (systems that expose tools) that any MCP-enabled AI agent like Goose can connect to! These MCP servers act as bridges between agents and external systems, enabling access to APIs, databases, and development environments. Some were developed by the official API providers, while the vast majority were developed by community members. Because MCP is an open standard, anyone can build an MCP server for any resource. This greatly increases the possibilities of AI agents!</p>
-<p>For example, let's say I want Goose to develop a new web app for me in my WebStorm IDE based on a Figma design and then commit the code to a new repo in GitHub. I can add the following MCP Servers as Goose extensions to give it all of these capabilities:</p>
-<ul>
-<li><a href="https://block.github.io/goose/docs/tutorials/figma-mcp">Figma</a></li>
-<li><a href="https://block.github.io/goose/docs/tutorials/jetbrains-mcp">JetBrains</a></li>
-<li><a href="https://block.github.io/goose/docs/tutorials/github-mcp">GitHub</a></li>
-</ul>
-<p>With this, I can prompt my AI agent in natural language and it'll take care of the work:</p>
-<blockquote>
-<p><em>"Based on the figma design with file ID XYZ, build a web app in WebStorm and commit the code to a new GitHub repo named angiejones/myapp"</em></p>
-</blockquote>
-<p>Pretty powerful, right?!</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="get-started-with-ai-agents">Get Started with AI Agents<a href="https://block.github.io/goose/blog/2025/02/17/agentic-ai-mcp#get-started-with-ai-agents" class="hash-link" aria-label="Direct link to Get Started with AI Agents" title="Direct link to Get Started with AI Agents">​</a></h2>
-<p>Hopefully this has provided clear insight into what are AI agents, how they work, and what they can enable for you. <a href="https://block.github.io/goose/docs/getting-started/installation">Goose</a> is free and open source and you can add as many <a href="https://block.github.io/goose/docs/getting-started/using-extensions#adding-extensions">extensions</a> as you desire. This is a great way to get started with AI agents and see how they can automate tasks in your workflow to make you more efficient.</p>
-]]></content>
-        <author>
-            <name>Angie Jones</name>
-            <uri>https://angiejones.tech</uri>
-        </author>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Introducing codename goose]]></title>
-        <id>https://block.github.io/goose/blog/2025/01/28/introducing-codename-goose</id>
-        <link href="https://block.github.io/goose/blog/2025/01/28/introducing-codename-goose"/>
-        <updated>2025-01-28T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[codename goose is your open source AI agent, automating engineering tasks and improving productivity.]]></summary>
-        <content type="html"><![CDATA[<p><img decoding="async" loading="lazy" alt="Introducing codename goose" src="https://block.github.io/goose/assets/images/introducing-codename-goose-89cac25816e0ea215dd47d4b9768c8ab.png" width="2240" height="1260" class="img_ev3q"></p>
-<p>We are thrilled to announce <strong>codename goose</strong>, your on-machine, open source AI agent built to automate your tasks.</p>
-<p>Powered by your choice of <a href="https://block.github.io/goose/docs/getting-started/providers">large language models (LLMs)</a>, a user-friendly desktop interface and CLI, and <a href="https://block.github.io/goose/docs/getting-started/using-extensions">extensions</a> that integrate with your existing tools and applications, Goose is designed to enhance your productivity and workflow.</p>
-<p>You can think of Goose as an assistant that is ready to take your instructions, and do the work for you.</p>
-<p>While Goose's first use cases are engineering focused, the community has been exploring other non-engineering use cases for Goose as well. And it goes without saying, Goose is <a href="https://github.com/block/goose" target="_blank" rel="noopener noreferrer">open source</a> 🎉.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="how-goose-works">How Goose Works<a href="https://block.github.io/goose/blog/2025/01/28/introducing-codename-goose#how-goose-works" class="hash-link" aria-label="Direct link to How Goose Works" title="Direct link to How Goose Works">​</a></h2>
-<p>Goose operates as an intelligent, autonomous agent capable of handling complex tasks through a well-orchestrated coordination of its core features:</p>
-<ul>
-<li>
-<p><strong>Using Extensions</strong>: <a href="https://block.github.io/goose/docs/getting-started/using-extensions">Extensions</a> are key to Goose’s adaptability, providing you the ability to connect with applications and tools that you already use. Whether it’s connecting to GitHub, accessing Google Drive or integrating with JetBrains IDEs, the possibilities are extensive. Some of these extensions have been curated in the <a href="https://block.github.io/goose/v1/extensions" target="_blank" rel="noopener noreferrer">extensions</a> directory. Goose extensions are built on the <a href="https://www.anthropic.com/news/model-context-protocol" target="_blank" rel="noopener noreferrer">Model Context Protocol (MCP)</a> - enabling you to build or bring your own custom integrations to Goose.</p>
-</li>
-<li>
-<p><strong>LLM Providers</strong>: Goose is compatible with a wide range of <a href="https://block.github.io/goose/docs/getting-started/providers">LLM providers</a>, allowing you to choose and integrate your preferred model.</p>
-</li>
-<li>
-<p><strong>CLI and Desktop Support</strong>: You can run Goose as a desktop app or through the command-line interface (CLI) using the same configurations across both.</p>
-</li>
-</ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="goose-in-action">Goose in Action<a href="https://block.github.io/goose/blog/2025/01/28/introducing-codename-goose#goose-in-action" class="hash-link" aria-label="Direct link to Goose in Action" title="Direct link to Goose in Action">​</a></h2>
-<p>Goose is able to handle a wide range of tasks, from simple to complex, across various engineering domains. Here are some examples of tasks that Goose has helped people with:</p>
-<ul>
-<li>Conduct code migrations such as Ember to React, Ruby to Kotlin, Prefect-1 to Prefect-2 etc.</li>
-<li>Dive into a new project in an unfamiliar coding language</li>
-<li>Transition a code-base from field-based injection to constructor-based injection in a dependency injection framework.</li>
-<li>Conduct performance benchmarks for a build command using a build automation tool</li>
-<li>Increasing code coverage above a specific threshold</li>
-<li>Scaffolding an API for data retention</li>
-<li>Creating Datadog monitors</li>
-<li>Removing or adding feature flags etc.</li>
-<li>Generating unit tests for a feature</li>
-</ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="getting-started">Getting Started<a href="https://block.github.io/goose/blog/2025/01/28/introducing-codename-goose#getting-started" class="hash-link" aria-label="Direct link to Getting Started" title="Direct link to Getting Started">​</a></h2>
-<p>You can get started using Goose right away! Check out our <a href="https://block.github.io/goose/docs/quickstart">Quickstart</a>.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="join-the-goose-community">Join the Goose Community<a href="https://block.github.io/goose/blog/2025/01/28/introducing-codename-goose#join-the-goose-community" class="hash-link" aria-label="Direct link to Join the Goose Community" title="Direct link to Join the Goose Community">​</a></h2>
-<p>Excited for upcoming features and events? Be sure to connect with us!</p>
-<ul>
-<li><a href="https://github.com/block/goose" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-<li><a href="https://discord.gg/block-opensource" target="_blank" rel="noopener noreferrer">Discord</a></li>
-<li><a href="https://www.youtube.com/@blockopensource" target="_blank" rel="noopener noreferrer">YouTube</a></li>
-<li><a href="https://www.linkedin.com/company/block-opensource" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-<li><a href="https://x.com/blockopensource" target="_blank" rel="noopener noreferrer">X</a></li>
-<li><a href="https://bsky.app/profile/opensource.block.xyz" target="_blank" rel="noopener noreferrer">BlueSky</a></li>
-</ul>
-]]></content>
-        <author>
-            <name>Adewale Abati</name>
-            <uri>https://adewaleabati.com</uri>
         </author>
     </entry>
 </feed>
