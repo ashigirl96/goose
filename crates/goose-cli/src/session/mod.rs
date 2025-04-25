@@ -426,7 +426,8 @@ impl Session {
                     self.messages.clear();
                     
                     // Persist empty message list to file
-                    let provider = self.agent.provider();
+                    let provider = self.agent.provider().await;
+                    let provider = Arc::clone(provider.as_ref().unwrap());
                     session::persist_messages(&self.session_file, &self.messages, Some(provider)).await?;
                     
                     output::render_success("Message history cleared.");
