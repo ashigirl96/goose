@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useModel } from '../settings/models/ModelContext';
 import { Sliders } from 'lucide-react';
 import { AlertType, useAlerts } from '../alerts';
@@ -11,11 +11,12 @@ import { settingsV2Enabled } from '../../flags';
 import { BottomMenuModeSelection } from './BottomMenuModeSelection';
 import ModelsBottomBar from '../settings_v2/models/bottom_bar/ModelsBottomBar';
 import { useConfig } from '../ConfigContext';
-import { getCurrentModelAndProvider } from '../settings_v2/models/index';
+import { getCurrentModelAndProvider } from '../settings_v2/models';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/Tooltip';
 
 const TOKEN_LIMIT_DEFAULT = 128000; // fallback for custom models that the backend doesn't know about
 const TOKEN_WARNING_THRESHOLD = 0.8; // warning shows at 80% of the token limit
-const TOOLS_MAX_SUGGESTED = 25; // max number of tools before we show a warning
+const TOOLS_MAX_SUGGESTED = 60; // max number of tools before we show a warning
 
 export default function BottomMenu({
   hasMessages,
@@ -33,6 +34,10 @@ export default function BottomMenu({
   const toolCount = useToolCount();
   const { getProviders, read } = useConfig();
   const [tokenLimit, setTokenLimit] = useState<number>(TOKEN_LIMIT_DEFAULT);
+  const [isDirTruncated, setIsDirTruncated] = useState(false);
+  // eslint-disable-next-line no-undef
+  const dirRef = useRef<HTMLSpanElement>(null);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   // Load providers and get current model's token limit
   const loadProviderDetails = async () => {
@@ -73,28 +78,31 @@ export default function BottomMenu({
     // Add token alerts if we have a token limit
     if (tokenLimit && numTokens > 0) {
       if (numTokens >= tokenLimit) {
-        addAlert(
-          AlertType.Error,
-          `Token limit reached (${numTokens.toLocaleString()}/${tokenLimit.toLocaleString()})`
-        );
+        addAlert({
+          type: AlertType.Error,
+          message: `Token limit reached (${numTokens.toLocaleString()}/${tokenLimit.toLocaleString()}) \n You’ve reached the model’s conversation limit. The session will be saved — copy anything important and start a new one to continue.`,
+          autoShow: true, // Auto-show token limit errors
+        });
       } else if (numTokens >= tokenLimit * TOKEN_WARNING_THRESHOLD) {
-        addAlert(
-          AlertType.Warning,
-          `Approaching token limit (${numTokens.toLocaleString()}/${tokenLimit.toLocaleString()})`
-        );
+        addAlert({
+          type: AlertType.Warning,
+          message: `Approaching token limit (${numTokens.toLocaleString()}/${tokenLimit.toLocaleString()}) \n You’re reaching the model’s conversation limit. The session will be saved — copy anything important and start a new one to continue.`,
+          autoShow: true, // Auto-show token limit warnings
+        });
       }
     }
 
     // Add tool count alert if we have the data
     if (toolCount !== null && toolCount > TOOLS_MAX_SUGGESTED) {
-      addAlert(
-        AlertType.Warning,
-        `Too many tools can degrade performance.\nTool count: ${toolCount} (recommend: ${TOOLS_MAX_SUGGESTED})`,
-        {
+      addAlert({
+        type: AlertType.Warning,
+        message: `Too many tools can degrade performance.\nTool count: ${toolCount} (recommend: ${TOOLS_MAX_SUGGESTED})`,
+        action: {
           text: 'View extensions',
           onClick: () => setView('settings'),
-        }
-      );
+        },
+        autoShow: false, // Don't auto-show tool count warnings
+      });
     }
     // We intentionally omit setView as it shouldn't trigger a re-render of alerts
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,6 +142,21 @@ export default function BottomMenu({
     };
   }, [isModelMenuOpen]);
 
+  useEffect(() => {
+    const checkTruncation = () => {
+      if (dirRef.current) {
+        setIsDirTruncated(dirRef.current.scrollWidth > dirRef.current.clientWidth);
+      }
+    };
+    checkTruncation();
+    window.addEventListener('resize', checkTruncation);
+    return () => window.removeEventListener('resize', checkTruncation);
+  }, []);
+
+  useEffect(() => {
+    setIsTooltipOpen(false);
+  }, [isDirTruncated]);
+
   return (
     <div className="flex justify-between items-center text-textSubtle relative bg-bgSubtle border-t border-borderSubtle text-xs pl-4 h-[40px] pb-1 align-middle">
       {/* Directory Chooser - Always visible */}
@@ -148,7 +171,23 @@ export default function BottomMenu({
         }}
       >
         <Document className="mr-1" />
-        Working in {window.appConfig.get('GOOSE_WORKING_DIR')}
+        <TooltipProvider>
+          <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+            <TooltipTrigger asChild>
+              <span
+                ref={dirRef}
+                className="truncate max-w-[170px] md:max-w-[200px] lg:max-w-[380px] min-w-0 block"
+              >
+                Working in {window.appConfig.get('GOOSE_WORKING_DIR') as string}
+              </span>
+            </TooltipTrigger>
+            {isDirTruncated && (
+              <TooltipContent className="max-w-96 overflow-auto scrollbar-thin" side="top">
+                {window.appConfig.get('GOOSE_WORKING_DIR') as string}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
         <ChevronUp className="ml-1" />
       </span>
 
