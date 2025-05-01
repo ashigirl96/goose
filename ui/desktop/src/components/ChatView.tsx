@@ -16,10 +16,12 @@ import { createRecipe } from '../recipe';
 import { AgentHeader } from './AgentHeader';
 import LayingEggLoader from './LayingEggLoader';
 import { fetchSessionDetails } from '../sessions';
-// import { configureRecipeExtensions } from '../utils/recipeExtensions';
 import 'react-toastify/dist/ReactToastify.css';
 import { useMessageStream } from '../hooks/useMessageStream';
+import { SessionSummaryModal } from './context_management/SessionSummaryModal';
 import { Recipe } from '../recipe';
+import { ContextManagerProvider, useChatContextManager } from './context_management/ContextManager';
+import { ContextLengthExceededHandler } from './context_management/ContextLengthExceededHandler';
 import {
   Message,
   createUserMessage,
@@ -61,6 +63,29 @@ export default function ChatView({
   setView: (view: View, viewOptions?: ViewOptions) => void;
   setIsGoosehintsModalOpen: (isOpen: boolean) => void;
 }) {
+  return (
+    <ContextManagerProvider>
+      <ChatContent
+        chat={chat}
+        setChat={setChat}
+        setView={setView}
+        setIsGoosehintsModalOpen={setIsGoosehintsModalOpen}
+      />
+    </ContextManagerProvider>
+  );
+}
+
+function ChatContent({
+  chat,
+  setChat,
+  setView,
+  setIsGoosehintsModalOpen,
+}: {
+  chat: ChatType;
+  setChat: (chat: ChatType) => void;
+  setView: (view: View, viewOptions?: ViewOptions) => void;
+  setIsGoosehintsModalOpen: (isOpen: boolean) => void;
+}) {
   // Disabled askAi calls to save costs
   // const [messageMetadata, setMessageMetadata] = useState<Record<string, string[]>>({});
   const [hasMessages, setHasMessages] = useState(false);
@@ -69,6 +94,25 @@ export default function ChatView({
   const [isGeneratingRecipe, setIsGeneratingRecipe] = useState(false);
   const [sessionTokenCount, setSessionTokenCount] = useState<number>(0);
   const scrollRef = useRef<ScrollAreaHandle>(null);
+
+  const {
+    summaryContent,
+    summarizedThread,
+    isSummaryModalOpen,
+    resetMessagesWithSummary,
+    closeSummaryModal,
+    updateSummary,
+    hasContextLengthExceededContent,
+  } = useChatContextManager();
+
+  useEffect(() => {
+    // Log all messages when the component first mounts
+    console.log('Initial messages when resuming session:', chat.messages);
+    window.electron.logInfo(
+      'Initial messages when resuming session: ' + JSON.stringify(chat.messages, null, 2)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array means this runs once on mount;
 
   // Get recipeConfig directly from appConfig
   const recipeConfig = window.appConfig.get('recipeConfig') as Recipe | null;
@@ -91,6 +135,12 @@ export default function ChatView({
     onFinish: async (_message, _reason) => {
       window.electron.stopPowerSaveBlocker();
 
+      setTimeout(() => {
+        if (scrollRef.current?.scrollToBottom) {
+          scrollRef.current.scrollToBottom();
+        }
+      }, 300);
+
       // Disabled askAi calls to save costs
       // const messageText = getTextContent(message);
       // const fetchResponses = await askAi(messageText);
@@ -105,11 +155,6 @@ export default function ChatView({
           body: 'Click here to expand.',
         });
       }
-    },
-    onToolCall: (toolCall: string) => {
-      // Handle tool calls if needed
-      console.log('Tool call received:', toolCall);
-      // Implement tool call handling logic here
     },
   });
 
@@ -189,11 +234,27 @@ export default function ChatView({
     window.electron.startPowerSaveBlocker();
     const customEvent = e as CustomEvent;
     const content = customEvent.detail?.value || '';
+
     if (content.trim()) {
       setLastInteractionTime(Date.now());
-      append(createUserMessage(content));
-      if (scrollRef.current?.scrollToBottom) {
-        scrollRef.current.scrollToBottom();
+
+      if (process.env.ALPHA && summarizedThread.length > 0) {
+        // First reset the messages with the summary
+        resetMessagesWithSummary(messages, setMessages);
+
+        // Then append the new user message
+        setTimeout(() => {
+          append(createUserMessage(content));
+          if (scrollRef.current?.scrollToBottom) {
+            scrollRef.current.scrollToBottom();
+          }
+        }, 150); // Small delay to ensure state updates properly
+      } else {
+        // Normal flow - just append the message
+        append(createUserMessage(content));
+        if (scrollRef.current?.scrollToBottom) {
+          scrollRef.current.scrollToBottom();
+        }
       }
     }
   };
@@ -291,6 +352,9 @@ export default function ChatView({
   // Filter out standalone tool response messages for rendering
   // They will be shown as part of the tool invocation in the assistant message
   const filteredMessages = messages.filter((message) => {
+    // Only filter out when display is explicitly false
+    if (message.display === false) return false;
+
     // Keep all assistant messages and user messages that aren't just tool responses
     if (message.role === 'assistant') return true;
 
@@ -379,17 +443,26 @@ export default function ChatView({
                   {isUserMessage(message) ? (
                     <UserMessage message={message} />
                   ) : (
-                    <GooseMessage
-                      messageHistoryIndex={chat?.messageHistoryIndex}
-                      message={message}
-                      messages={messages}
-                      // metadata={messageMetadata[message.id || '']}
-                      append={(text) => append(createUserMessage(text))}
-                      appendMessage={(newMessage) => {
-                        const updatedMessages = [...messages, newMessage];
-                        setMessages(updatedMessages);
-                      }}
-                    />
+                    <>
+                      {/* Only render GooseMessage if it's not a CLE message (and we are not in alpha mode) */}
+                      {process.env.ALPHA && hasContextLengthExceededContent(message) ? (
+                        <ContextLengthExceededHandler
+                          messages={messages}
+                          messageId={message.id ?? message.created.toString()}
+                        />
+                      ) : (
+                        <GooseMessage
+                          messageHistoryIndex={chat?.messageHistoryIndex}
+                          message={message}
+                          messages={messages}
+                          append={(text) => append(createUserMessage(text))}
+                          appendMessage={(newMessage) => {
+                            const updatedMessages = [...messages, newMessage];
+                            setMessages(updatedMessages);
+                          }}
+                        />
+                      )}
+                    </>
                   )}
                 </div>
               ))}
@@ -434,6 +507,17 @@ export default function ChatView({
       </Card>
 
       {showGame && <FlappyGoose onClose={() => setShowGame(false)} />}
+      {process.env.ALPHA && (
+        <SessionSummaryModal
+          isOpen={isSummaryModalOpen}
+          onClose={closeSummaryModal}
+          onSave={(editedContent) => {
+            updateSummary(editedContent);
+            closeSummaryModal();
+          }}
+          summaryContent={summaryContent}
+        />
+      )}
     </div>
   );
 }
